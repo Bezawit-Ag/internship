@@ -1,35 +1,66 @@
-// src/components/Sidebar.jsx
-const Sidebar = () => {
+import { LayoutDashboard, Users, Map, HeartHandshake, FileText, UserCog, History, Settings, LogOut, ChevronLeft } from "lucide-react";
+
+export default function Sidebar() {
   const menuItems = [
-    "Dashboard",
-    "Supplier Management",
-    "Area Assignment",
-    "Beneficiaries",
-    "Reports",
-    "User Management",
-    "Audit Logs",
-    "Settings",
+    { name: "Dashboard", icon: LayoutDashboard, active: true },
+    { name: "Supplier Management", icon: Users, active: false },
+    { name: "Area Assignment", icon: Map, active: false },
+    { name: "Beneficiaries", icon: HeartHandshake, active: false },
+    { name: "Reports", icon: FileText, active: false },
+    { name: "User Management", icon: UserCog, active: false },
+    { name: "Audit Logs", icon: History, active: false },
+    { name: "Settings", icon: Settings, active: false },
   ];
 
   return (
-    <aside className="w-64 bg-blue-900 text-white flex flex-col p-5">
-      <div className="text-xl font-bold mb-6">SEDMS</div>
-      <p className="text-sm text-purple-300 mb-4">Logged in as Dr. Kassahun Tadesse</p>
-      <div className="flex-1">
-        <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li
-              key={item}
-              className="p-2 rounded hover:bg-blue-700 cursor-pointer"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+    <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto">
+      <div className="p-6">
+        <div className="flex items-center gap-3 font-bold text-lg text-primary">
+          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+            {/* Logo icon representation */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5v14M7 5v14M22 8v8M2 8v8"/></svg>
+          </div>
+          <div className="leading-tight">
+            <span className="block text-slate-800">SEDMS</span>
+            <span className="text-[9px] uppercase tracking-wider text-slate-400">Amhara Water & Energy</span>
+          </div>
+        </div>
       </div>
-      <button className="mt-4 p-2 bg-red-500 rounded hover:bg-red-600">Sign Out</button>
+
+      <div className="px-6 py-4">
+        <div className="bg-slate-50 rounded-xl p-3 flex flex-col gap-1 border border-slate-100">
+          <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Logged In As</span>
+          <span className="text-sm font-bold text-slate-800">Dr. Kassahun Tadesse</span>
+          <span className="text-[10px] bg-blue-100 text-blue-700 w-max px-2 py-0.5 rounded-full font-bold">SUPER ADMIN</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-4 mt-2 flex flex-col gap-1">
+        {menuItems.map((item, i) => (
+          <button
+            key={i}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              item.active 
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <item.icon className="w-4 h-4" />
+            {item.name}
+          </button>
+        ))}
+      </nav>
+
+      <div className="p-4 border-t border-slate-100 flex flex-col gap-2">
+         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Collapse
+         </button>
+         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors">
+            <LogOut className="w-4 h-4" />
+            Sign Out
+         </button>
+      </div>
     </aside>
   );
-};
-
-export default Sidebar;
+}

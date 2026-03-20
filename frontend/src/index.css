@@ -1,32 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom scrollbars for sidebar and main content */
-::-webkit-scrollbar {
-  width: 8px;
+:root {
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --success: #22c55e;
+  --error: #ef4444;
 }
 
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 116, 139, 0.5); /* gray-500 */
+  background: #cbd5e1;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 116, 139, 0.8);
-}
-
-/* Optional: smooth scrolling for main content */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Optional: override Tailwind card shadows */
-.card-shadow {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-}
-
-/* Badge styles (notifications) */
-.badge {
-  @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center;
+  background: #94a3b8;
 }
