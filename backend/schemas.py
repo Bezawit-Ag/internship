@@ -1,6 +1,30 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Optional
+
+class SupplierResponse(BaseModel):
+    id: int
+    name: str
+
+class ZoneResponse(BaseModel):
+    id: int
+    name: str
+
+class WoredaResponse(BaseModel):
+    id: int
+    zone_id: int
+    name: str
+
+class AreaOptionsResponse(BaseModel):
+    suppliers: List[SupplierResponse]
+    zones: List[ZoneResponse]
+    woredas: List[WoredaResponse]
+
+class AreaAssignmentCreate(BaseModel):
+    supplier_id: int
+    zone_id: int
+    woreda_id: int
+    kebele: str
 
 class DashboardStatsResponse(BaseModel):
     total_suppliers: int

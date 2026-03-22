@@ -1,15 +1,15 @@
 import { LayoutDashboard, Users, Map, HeartHandshake, FileText, UserCog, History, Settings, LogOut, ChevronLeft } from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ activeMenu, setActiveMenu }) {
   const menuItems = [
-    { name: "Dashboard", icon: LayoutDashboard, active: true },
-    { name: "Supplier Management", icon: Users, active: false },
-    { name: "Area Assignment", icon: Map, active: false },
-    { name: "Beneficiaries", icon: HeartHandshake, active: false },
-    { name: "Reports", icon: FileText, active: false },
-    { name: "User Management", icon: UserCog, active: false },
-    { name: "Audit Logs", icon: History, active: false },
-    { name: "Settings", icon: Settings, active: false },
+    { name: "Dashboard", icon: LayoutDashboard },
+    { name: "Supplier Management", icon: Users },
+    { name: "Area Assignment", icon: Map },
+    { name: "Beneficiaries", icon: HeartHandshake },
+    { name: "Reports", icon: FileText },
+    { name: "User Management", icon: UserCog },
+    { name: "Audit Logs", icon: History },
+    { name: "Settings", icon: Settings },
   ];
 
   return (
@@ -39,8 +39,9 @@ export default function Sidebar() {
         {menuItems.map((item, i) => (
           <button
             key={i}
+            onClick={() => setActiveMenu(item.name)}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              item.active 
+              activeMenu === item.name 
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
             }`}

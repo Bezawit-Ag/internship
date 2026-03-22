@@ -39,12 +39,16 @@ def init_db():
 
     conn = get_db_connection()
     c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS area_assignments;")
+    c.execute("DROP TABLE IF EXISTS woredas;")
+    c.execute("DROP TABLE IF EXISTS zones;")
+    c.execute("DROP TABLE IF EXISTS suppliers;")
     c.execute("DROP TABLE IF EXISTS activity_logs;")
     c.execute("DROP TABLE IF EXISTS dashboard_stats;")
     
     c.execute('''
         CREATE TABLE dashboard_stats (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             total_suppliers INTEGER,
             suppliers_trend REAL,
             total_beneficiaries INTEGER,
@@ -67,6 +71,43 @@ def init_db():
             details TEXT,
             status TEXT,
             timestamp DATETIME
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE suppliers (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE zones (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE woredas (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            zone_id INTEGER,
+            name VARCHAR(255) NOT NULL,
+            FOREIGN KEY (zone_id) REFERENCES zones(id)
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE area_assignments (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            supplier_id INTEGER NOT NULL,
+            zone_id INTEGER NOT NULL,
+            woreda_id INTEGER NOT NULL,
+            kebele VARCHAR(255) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+            FOREIGN KEY (zone_id) REFERENCES zones(id),
+            FOREIGN KEY (woreda_id) REFERENCES woredas(id)
         );
     ''')
     conn.commit()
