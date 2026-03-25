@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
+import AmharaMap from './AmharaMap';
 
 export default function AreaAssignment() {
   const [options, setOptions] = useState({ suppliers: [], zones: [], woredas: [] });
@@ -113,10 +114,10 @@ export default function AreaAssignment() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-8 flex flex-row gap-8 items-start w-full overflow-x-auto">
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-8 flex flex-col xl:flex-row gap-8 items-start w-full">
         
         {/* Form Section (Left Side) */}
-        <div className="flex-1 min-w-[450px]">
+        <div className="flex-1 w-full xl:max-w-[450px]">
           <h2 className="text-lg font-bold text-[#1e3a8a] mb-6 flex items-center gap-2">
              Assign Supplier to Area
           </h2>
@@ -206,33 +207,19 @@ export default function AreaAssignment() {
           </form>
         </div>
 
-        {/* Coverage Overview Section (Right Side Map Box) */}
-        <div className="w-[350px] flex-shrink-0 bg-[#1e347a] rounded-[24px] p-6 flex flex-col text-white shadow-xl relative overflow-hidden h-[330px]">
+        {/* Map Section (Right Side / Bottom) */}
+        <div className="w-full xl:flex-[2] bg-white border border-slate-200 rounded-[24px] p-4 flex flex-col relative overflow-hidden min-h-[600px] shadow-sm">
+          <h3 className="font-bold text-slate-800 mb-4 text-[16px] px-2 flex justify-between items-center">
+            Amhara Region Distribution
+            <span className="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              {assignments.length} Projects Deployed
+            </span>
+          </h3>
           
-          <h3 className="font-bold mb-4 relative z-10 text-[15px]">Coverage Overview</h3>
-          
-          {/* Inner Map Placeholder matching the mockup exactly */}
-          <div className="flex-1 bg-[#28418f] border border-blue-400/20 rounded-[16px] flex flex-col items-center justify-center relative z-10 mb-8 p-4">
-             <div className="w-12 h-12 rounded-full border border-blue-300/50 flex items-center justify-center mb-3 bg-[#1e347a]/50">
-                 <MapPin className="text-blue-300 w-6 h-6" strokeWidth={2} />
-             </div>
-             <span className="text-blue-200 text-sm font-medium tracking-wide">Interactive Map</span>
+          {/* Interactive Amhara Map (Huge mode!) */}
+          <div className="flex-1 w-full min-h-[500px] relative z-10 rounded-[16px] border border-slate-200 overflow-hidden shadow-inner">
+             <AmharaMap assignments={assignments} />
           </div>
-          
-          {/* Progress Bar */}
-          <div className="relative z-10 mt-auto">
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-blue-100 text-[13px] font-medium opacity-90">Coverage</span>
-              <span className="text-2xl font-bold">{coverage}%</span>
-            </div>
-            <div className="h-2 w-full bg-[#152a6a] rounded-full overflow-hidden shadow-inner flex relative">
-               <div 
-                 className="h-full bg-[#3b82f6] rounded-full transition-all duration-1000" 
-                 style={{ width: `${coverage}%` }}
-               ></div>
-            </div>
-          </div>
-          
         </div>
 
       </div>
