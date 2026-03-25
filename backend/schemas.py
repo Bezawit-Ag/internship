@@ -40,7 +40,7 @@ class DashboardStatsResponse(BaseModel):
     issues_trend: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ActivityLogResponse(BaseModel):
     id: int
@@ -51,7 +51,7 @@ class ActivityLogResponse(BaseModel):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ChartDataPoint(BaseModel):
     month: str

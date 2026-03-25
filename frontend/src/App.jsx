@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import DashboardCards from './components/DashboardCards';
-import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './components/Charts';
-import ActivityLog from './components/ActivityLog';
-import AreaAssignment from './components/AreaAssignment';
+import DashboardCards from './pages/super-admin/DashboardCards';
+import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './pages/super-admin/Charts';
+import ActivityLog from './pages/super-admin/ActivityLog';
+import AreaAssignment from './pages/super-admin/AreaAssignment';
 
 function App() {
   const [data, setData] = useState(null);
