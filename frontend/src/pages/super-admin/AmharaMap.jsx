@@ -23,16 +23,16 @@ const redIcon = new L.Icon({
 
 // Approximate coordinate centers for zones in Amhara region
 const zoneCoordinates = {
-  "N. Gondar": [12.6000, 37.4600],
-  "E. Gojam": [10.3300, 37.7300],
-  "S. Wollo": [11.1300, 39.6300],
+  "North Gondar": [12.6000, 37.4600],
+  "East Gojam": [10.3300, 37.7300],
+  "South Wollo": [11.1300, 39.6300],
   "Awi": [10.6600, 36.5600],
   "Wag Hemra": [12.6300, 38.6400],
-  "W. Gojam": [10.9700, 37.4300],
+  "West Gojam": [10.9700, 37.4300],
   "Oromia Zone": [10.8700, 40.0300],
-  "N. Wollo": [11.9000, 39.3000],
-  "S. Gondar": [11.7000, 38.0000],
-  "N. Shewa": [9.8000, 39.4000]
+  "North Wollo": [11.9000, 39.3000],
+  "South Gondar": [11.7000, 38.0000],
+  "North Shewa": [9.8000, 39.4000]
 };
 
 // Amhara Region Center (Bahir Dar area)
