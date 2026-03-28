@@ -14,15 +14,13 @@ def seed_data():
         ) VALUES (1, 124, 12.0, 45280, 8.0, 41289, 15.0, 11, 342, -4.0, 28, -6.0)
     ''')
     
-    # Insert Suppliers
+    
     suppliers = [("Solar Solutions",), ("SunPower Tech",), ("Zemen Energy",), ("BrightFuture",), ("EthioSun",)]
     c.executemany("INSERT INTO suppliers (name) VALUES (%s)", suppliers)
     
-    # Insert Zones
     zones = [("North Gondar",), ("East Gojam",), ("South Wollo",), ("Awi",), ("Wag Hemra",), ("West Gojam",)]
     c.executemany("INSERT INTO zones (name) VALUES (%s)", zones)
-    
-    # Insert Woredas
+
     woredas = [
         (1, "Debark"), (1, "Dabat"), 
         (2, "Debre Markos"), (2, "Bichena"),
