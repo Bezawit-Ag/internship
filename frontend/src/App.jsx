@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import Sidebar from './pages/super-admin/components/Sidebar';
+import Header from './pages/super-admin/components/Header';
 import DashboardCards from './pages/super-admin/DashboardCards';
 import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './pages/super-admin/Charts';
 import ActivityLog from './pages/super-admin/ActivityLog';

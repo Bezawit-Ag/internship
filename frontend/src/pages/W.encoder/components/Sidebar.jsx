@@ -1,27 +1,61 @@
-import React from 'react';
+import { HeartHandshake, AlertCircle, ChevronLeft, LogOut } from "lucide-react";
 
-const Sidebar = ({ activeMenu, setActiveMenu }) => {
+export default function Sidebar({ activeMenu, setActiveMenu }) {
+  const menuItems = [
+    { name: "Beneficiary Registry", icon: HeartHandshake },
+    { name: "Problem Registry", icon: AlertCircle },
+  ];
+
   return (
-    <div className="w-64 bg-slate-800 text-white flex flex-col fixed h-full shrink-0">
-      <div className="p-4 border-b border-slate-700">
-        <h1 className="text-xl font-bold">Woreda Encoder</h1>
+    <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto">
+      <div className="p-6">
+        <div className="flex items-center gap-3 font-bold text-lg text-primary">
+          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+            {/* Logo icon representation */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5v14M7 5v14M22 8v8M2 8v8"/></svg>
+          </div>
+          <div className="leading-tight">
+            <span className="block text-slate-800">SEDMS</span>
+            <span className="text-[9px] uppercase tracking-wider text-slate-400">Woreda Encoder</span>
+          </div>
+        </div>
       </div>
-      <nav className="flex-1 p-4 font-medium space-y-2">
-        <button 
-          onClick={() => setActiveMenu('Beneficiary Registry')}
-          className={`w-full text-left p-3 rounded transition-colors ${activeMenu === 'Beneficiary Registry' ? 'bg-blue-600 text-white' : 'hover:bg-slate-700 text-slate-300'}`}
-        >
-          Beneficiary Registry
-        </button>
-        <button 
-          onClick={() => setActiveMenu('Problem Registry')}
-          className={`w-full text-left p-3 rounded transition-colors ${activeMenu === 'Problem Registry' ? 'bg-blue-600 text-white' : 'hover:bg-slate-700 text-slate-300'}`}
-        >
-          Problem Registry
-        </button>
-      </nav>
-    </div>
-  );
-};
 
-export default Sidebar;
+      <div className="px-6 py-4">
+        <div className="bg-slate-50 rounded-xl p-3 flex flex-col gap-1 border border-slate-100">
+          <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Logged In As</span>
+          <span className="text-sm font-bold text-slate-800">Woreda Encoder</span>
+          <span className="text-[10px] bg-blue-100 text-blue-700 w-max px-2 py-0.5 rounded-full font-bold">ENCODER</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-4 mt-2 flex flex-col gap-1">
+        {menuItems.map((item, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveMenu(item.name)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              activeMenu === item.name 
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <item.icon className="w-4 h-4" />
+            {item.name}
+          </button>
+        ))}
+      </nav>
+
+      <div className="p-4 border-t border-slate-100 flex flex-col gap-2">
+         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Collapse
+         </button>
+         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors">
+            <LogOut className="w-4 h-4" />
+            Sign Out
+         </button>
+      </div>
+    </aside>
+  );
+}
