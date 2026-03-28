@@ -7,6 +7,7 @@ import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, Supp
 import ActivityLog from './pages/super-admin/ActivityLog';
 import AreaAssignment from './pages/super-admin/AreaAssignment';
 import WoredaEncoderDashboard from './pages/W.encoder/Dashboard';
+import WoredaApproverDashboard from './pages/W.approver/Dashboard';
 
 function SuperAdminApp() {
   const [data, setData] = useState(null);
@@ -78,6 +79,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/wencoder/*" element={<WoredaEncoderDashboard />} />
+        <Route path="/wapprover/*" element={<WoredaApproverDashboard />} />
         {/* Default route for now maps to Super Admin Dashboard until authentication is ready */}
         <Route path="/*" element={<SuperAdminApp />} />
       </Routes>
