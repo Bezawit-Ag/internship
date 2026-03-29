@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix for default marker icons in Leaflet with bundlers like Vite
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -11,7 +11,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Red Icon for permanent assignments
+
 const redIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -44,20 +44,20 @@ function getStableOffset(seed) {
   // A simple seeded random number generator
   const x = Math.sin(seed * 12.9898 + 1) * 43758.5453;
   const y = Math.sin(seed * 78.233 + 2) * 43758.5453;
-  
+
   // Convert to scatter offsets between -0.4 and +0.4 degrees (~44km spread)
   const latOffset = (x - Math.floor(x) - 0.5) * 0.8;
   const lngOffset = (y - Math.floor(y) - 0.5) * 0.8;
-  
+
   return [latOffset, lngOffset];
 }
 
 export default function AmharaMap({ assignments }) {
   return (
     <div className="w-full rounded-[16px] overflow-hidden border border-blue-400/20 shadow-inner" style={{ height: '500px', minHeight: '500px' }}>
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={7} 
+      <MapContainer
+        center={defaultCenter}
+        zoom={7}
         scrollWheelZoom={false}
         style={{ height: '500px', width: '100%', zIndex: 0 }}
       >
@@ -65,7 +65,7 @@ export default function AmharaMap({ assignments }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         {assignments && assignments.map((assignment, index) => {
           const baseCoords = zoneCoordinates[assignment.zone_name];
           if (!baseCoords) return null; // If we don't know the zone coords, skip
@@ -74,7 +74,7 @@ export default function AmharaMap({ assignments }) {
           // This scatters them so they NEVER overlap, but permanently anchors them so they NEVER move!
           const seed = parseInt(assignment.id) || index + 1;
           const [latOffset, lngOffset] = getStableOffset(seed);
-          
+
           const position = [
             baseCoords[0] + latOffset,
             baseCoords[1] + lngOffset

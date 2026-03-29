@@ -201,7 +201,7 @@ export default function AreaAssignment() {
                 disabled={saving}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md shadow-blue-500/30 transition-all disabled:opacity-70 mt-2"
               >
-                {saving ? 'Saving...' : 'Save Assignment'}
+                {saving ? 'Saving...' : 'New Assignment'}
               </button>
             </div>
           </form>
