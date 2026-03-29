@@ -19,7 +19,7 @@ def test_connection(password):
         return False
 
 if __name__ == "__main__":
-    passwords_to_test = ["Gembele1416@", "", "root", "password", "root123", "admin"]
+    passwords_to_test = ["Elsa@123456789", "", "root", "password", "root123", "admin"]
     for pwd in passwords_to_test:
         if test_connection(pwd):
             break
