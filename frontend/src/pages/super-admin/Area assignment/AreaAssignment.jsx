@@ -64,9 +64,9 @@ export default function AreaAssignment() {
     setMessage(null);
 
     if (!formData.supplier_id || !formData.zone_id || !formData.woreda_id || !formData.kebele) {
-       setSaving(false);
-       setMessage({ type: 'error', text: 'Please fill out all fields.' });
-       return;
+      setSaving(false);
+      setMessage({ type: 'error', text: 'Please fill out all fields.' });
+      return;
     }
 
     try {
@@ -98,7 +98,7 @@ export default function AreaAssignment() {
     }
   };
 
-  const filteredWoredas = formData.zone_id 
+  const filteredWoredas = formData.zone_id
     ? options.woredas.filter(w => w.zone_id === parseInt(formData.zone_id))
     : options.woredas;
 
@@ -115,22 +115,22 @@ export default function AreaAssignment() {
 
       {/* Main Card */}
       <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-8 flex flex-col xl:flex-row gap-8 items-start w-full">
-        
+
         {/* Form Section (Left Side) */}
         <div className="flex-1 w-full xl:max-w-[450px]">
           <h2 className="text-lg font-bold text-[#1e3a8a] mb-6 flex items-center gap-2">
-             Assign Supplier to Area
+            Assign Supplier to Area
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            
+
             {/* Row 1 */}
             <div className="flex flex-row gap-6 w-full">
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-semibold text-slate-700">Supplier</label>
-                <select 
-                  name="supplier_id" 
-                  value={formData.supplier_id} 
+                <select
+                  name="supplier_id"
+                  value={formData.supplier_id}
                   onChange={handleChange}
                   className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full"
                 >
@@ -143,9 +143,9 @@ export default function AreaAssignment() {
 
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-semibold text-slate-700">Zone</label>
-                <select 
-                  name="zone_id" 
-                  value={formData.zone_id} 
+                <select
+                  name="zone_id"
+                  value={formData.zone_id}
                   onChange={handleChange}
                   className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full"
                 >
@@ -161,9 +161,9 @@ export default function AreaAssignment() {
             <div className="flex flex-row gap-6 w-full">
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-semibold text-slate-700">Woreda</label>
-                <select 
-                  name="woreda_id" 
-                  value={formData.woreda_id} 
+                <select
+                  name="woreda_id"
+                  value={formData.woreda_id}
                   onChange={handleChange}
                   className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full"
                 >
@@ -176,10 +176,10 @@ export default function AreaAssignment() {
 
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-semibold text-slate-700">Kebele</label>
-                <input 
-                  type="text" 
-                  name="kebele" 
-                  value={formData.kebele} 
+                <input
+                  type="text"
+                  name="kebele"
+                  value={formData.kebele}
                   onChange={handleChange}
                   placeholder="Enter Kebele"
                   className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
@@ -196,8 +196,8 @@ export default function AreaAssignment() {
 
             {/* Submit Button */}
             <div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={saving}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md shadow-blue-500/30 transition-all disabled:opacity-70 mt-2"
               >
@@ -215,10 +215,10 @@ export default function AreaAssignment() {
               {assignments.length} Projects Deployed
             </span>
           </h3>
-          
+
           {/* Interactive Amhara Map (Huge mode!) */}
           <div className="flex-1 w-full min-h-[500px] relative z-10 rounded-[16px] border border-slate-200 overflow-hidden shadow-inner">
-             <AmharaMap assignments={assignments} />
+            <AmharaMap assignments={assignments} />
           </div>
         </div>
 

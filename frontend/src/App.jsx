@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './pages/super-admin/components/Sidebar';
-import Header from './pages/super-admin/components/Header';
-import DashboardCards from './pages/super-admin/DashboardCards';
-import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './pages/super-admin/Charts';
-import ActivityLog from './pages/super-admin/ActivityLog';
-import AreaAssignment from './pages/super-admin/AreaAssignment';
+import Sidebar from './pages/super-admin/Dashboard/components/Sidebar';
+import Header from './pages/super-admin/Dashboard/components/Header';
+import DashboardCards from './pages/super-admin/Dashboard/DashboardCards';
+import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './pages/super-admin/Dashboard/Charts';
+import ActivityLog from './pages/super-admin/Dashboard/ActivityLog';
+import AreaAssignment from './pages/super-admin/Area assignment/AreaAssignment';
 import WoredaEncoderDashboard from './pages/W.encoder/Dashboard';
 import WoredaApproverDashboard from './pages/W.approver/Dashboard';
 
@@ -57,7 +57,7 @@ function SuperAdminApp() {
                   <SupplierPerformanceChart data={data.supplier_performance} />
                 </div>
 
-                <ActivityLog activities={data.recent_activity} />
+                {/* <ActivityLog activities={data.recent_activity} /> */}
               </div>
             ) : (
               <div className="flex h-full items-center justify-center font-bold text-red-400">Failed to load data.</div>
