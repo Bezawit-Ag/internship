@@ -1,9 +1,11 @@
-import { HeartHandshake, AlertCircle, ChevronLeft, LogOut } from "lucide-react";
+import { ClipboardList, AlertTriangle, RefreshCw, Bell, ChevronLeft, LogOut } from "lucide-react";
 
 export default function Sidebar({ activeMenu, setActiveMenu }) {
   const menuItems = [
-    { name: "Beneficiary Registry", icon: HeartHandshake },
-    { name: "Problem Registry", icon: AlertCircle },
+    { name: "Notifications", icon: Bell },
+    { name: "Beneficiary Registration", icon: ClipboardList },
+    { name: "Problem Register", icon: AlertTriangle },
+    { name: "Change Status", icon: RefreshCw },
   ];
 
   return (
