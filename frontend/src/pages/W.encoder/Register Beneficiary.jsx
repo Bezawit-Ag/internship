@@ -15,6 +15,20 @@ const STEPS = [
   { id: 6, label: 'Review', icon: CheckCircle2 }
 ];
 
+const ZONE_WOREDAS = {
+  "North Gondar": ["Debark", "Dabat", "Dabal"],
+  "South Gondar": ["Debre Tabor", "Farta", "Fogera"],
+  "North Wollo": ["Woldiya", "Kobo"],
+  "South Wollo": ["Dessie Zuria", "Kombolcha"],
+  "Awi": ["Dangila", "Injibara"],
+  "East Gojjam": ["Debre Markos", "Bichena"],
+  "West Gojjam": ["Finote Selam", "Bure"],
+  "Wag Hemra": ["Sekota"],
+  "Oromia": ["Kemise", "Bati"],
+  "Central Gondar": ["Gondar", "Chilga"],
+  "Benshangul": ["Assosa", "Bambasi"]
+};
+
 const RegisterBeneficiary = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -31,6 +45,12 @@ const RegisterBeneficiary = () => {
     gender: '',
     householdSize: '',
     monthlyIncome: '',
+    institutionName: '',
+    institutionType: '',
+    representativeName: '',
+    representativePhone: '',
+    intendedUsage: '',
+    monthlyIncomeSource: '',
     lightingSource: '',
     energyNeeds: '',
     electricityAccess: 'Yes',
@@ -45,7 +65,32 @@ const RegisterBeneficiary = () => {
     installerName: '',
     salePrice: '',
     batteryCapacity: '',
-    comments: ''
+    comments: '',
+    idPhoto: null,
+    proofPhoto: null,
+    offGridType: '',
+    projectCapacity: '',
+    solarPanelType: '',
+    noOfSolarPanel: '',
+    solarPanelManufacture: '',
+    solarPanelModel: '',
+    batteryType: '',
+    noOfBattery: '',
+    batteryManufacture: '',
+    batteryModel: '',
+    systemVoltage: '',
+    totalEnergyOfBattery: '',
+    inverterType: '',
+    inverterManufacture: '',
+    inverterMode: '',
+    noOfInverter: '',
+    inverterCapacity: '',
+    breakerBoard: '',
+    hydroPowerType: '',
+    minimumFlow: '',
+    hydroHead: '',
+    estimatedPowerOutput: '',
+    projectCost: ''
   });
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 6));
@@ -104,23 +149,41 @@ const RegisterBeneficiary = () => {
           { id: 'Institution', icon: Building2, desc: 'School, health post, hospital, government office or mosque' },
           { id: 'Off-Grid', icon: Zap, desc: 'Community solar grid, hydro power, or wind energy project' }
         ].map(type => (
-          <button
-            key={type.id}
-            onClick={() => updateFormData('surveyType', type.id)}
-            className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-              formData.surveyType === type.id 
-                ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-500/10' 
-                : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <div className={`p-3 rounded-lg ${formData.surveyType === type.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
-              <type.icon className="w-6 h-6" />
-            </div>
-            <div>
-              <h5 className={`font-bold ${formData.surveyType === type.id ? 'text-blue-900' : 'text-slate-700'}`}>{type.id}</h5>
-              <p className="text-slate-500 text-sm mt-1">{type.desc}</p>
-            </div>
-          </button>
+          <div key={type.id}>
+            <button
+              onClick={() => updateFormData('surveyType', type.id)}
+              className={`flex w-full items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
+                formData.surveyType === type.id 
+                  ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-500/10' 
+                  : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <div className={`p-3 rounded-lg ${formData.surveyType === type.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <type.icon className="w-6 h-6" />
+              </div>
+              <div>
+                <h5 className={`font-bold ${formData.surveyType === type.id ? 'text-blue-900' : 'text-slate-700'}`}>{type.id}</h5>
+                <p className="text-slate-500 text-sm mt-1">{type.desc}</p>
+              </div>
+            </button>
+            {type.id === 'Off-Grid' && formData.surveyType === 'Off-Grid' && (
+              <div className="ml-16 mt-4 grid grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2">
+                {['Solar Grid', 'Hydro Power', 'Wind'].map(ogt => (
+                  <button
+                    key={ogt}
+                    onClick={() => updateFormData('offGridType', ogt)}
+                    className={`p-3 text-sm font-semibold rounded-xl border-2 transition-all ${
+                      formData.offGridType === ogt
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    {ogt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
@@ -139,11 +202,12 @@ const RegisterBeneficiary = () => {
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.zone}
-            onChange={(e) => updateFormData('zone', e.target.value)}
+            onChange={(e) => { updateFormData('zone', e.target.value); updateFormData('woreda', ''); }}
           >
             <option value="">Select...</option>
-            <option value="North Gondar">North Gondar</option>
-            <option value="South Gondar">South Gondar</option>
+            {Object.keys(ZONE_WOREDAS).map(zone => (
+              <option key={zone} value={zone}>{zone}</option>
+            ))}
           </select>
         </div>
         <div className="space-y-2">
@@ -152,10 +216,12 @@ const RegisterBeneficiary = () => {
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.woreda}
             onChange={(e) => updateFormData('woreda', e.target.value)}
+            disabled={!formData.zone}
           >
             <option value="">Select Zone first</option>
-            <option value="Dabat">Dabat</option>
-            <option value="Debarq">Debarq</option>
+            {formData.zone && ZONE_WOREDAS[formData.zone]?.map(woreda => (
+              <option key={woreda} value={woreda}>{woreda}</option>
+            ))}
           </select>
         </div>
         <div className="space-y-2">
@@ -202,7 +268,96 @@ const RegisterBeneficiary = () => {
     </div>
   );
 
-  const Step3 = () => (
+  const Step3 = () => {
+    if (formData.surveyType === 'Institution') {
+      return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div>
+            <div className="flex items-center gap-2 text-purple-600 font-bold mb-4">
+              <Building2 className="w-5 h-5" />
+              <h4 className="text-lg text-slate-800">Institution Information</h4>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Institution Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Dabat Primary School"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  value={formData.institutionName}
+                  onChange={(e) => updateFormData('institutionName', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Institution Type *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                  value={formData.institutionType}
+                  onChange={(e) => updateFormData('institutionType', e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="School">School</option>
+                  <option value="Health Post">Health Post</option>
+                  <option value="Health Center">Health Center</option>
+                  <option value="Hospital">Hospital</option>
+                  <option value="Government Office">Government Office</option>
+                  <option value="Mosque">Mosque</option>
+                  <option value="Church">Church</option>
+                  <option value="Market">Market</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Representative Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="Name of institution head"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  value={formData.representativeName}
+                  onChange={(e) => updateFormData('representativeName', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Representative Phone</label>
+                <input 
+                  type="text" 
+                  placeholder="+251 9..."
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  value={formData.representativePhone}
+                  onChange={(e) => updateFormData('representativePhone', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Intended Usage</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Classroom lighting and computer lab"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  value={formData.intendedUsage}
+                  onChange={(e) => updateFormData('intendedUsage', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Monthly Income Source</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                  value={formData.monthlyIncomeSource}
+                  onChange={(e) => updateFormData('monthlyIncomeSource', e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="Government Budget">Government Budget</option>
+                  <option value="NGO/Donor">NGO/Donor</option>
+                  <option value="Community Contribution">Community Contribution</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <div className="flex items-center gap-2 text-blue-500 font-bold mb-4">
@@ -348,6 +503,7 @@ const RegisterBeneficiary = () => {
       </div>
     </div>
   );
+};
 
   const Step4 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -392,15 +548,26 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Assigned Supplier *</label>
+          <label className="text-sm font-semibold text-slate-700">
+            {formData.surveyType === 'Institution' || formData.surveyType === 'Off-Grid' ? 'Contractor' : 'Assigned Supplier'} *
+          </label>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.assignedSupplier}
             onChange={(e) => updateFormData('assignedSupplier', e.target.value)}
           >
             <option value="">Select...</option>
-            <option value="Solar Solutions Ethiopia PLC">Solar Solutions Ethiopia PLC</option>
-            <option value="EthioSun Light">EthioSun Light</option>
+            {formData.surveyType === 'Institution' || formData.surveyType === 'Off-Grid' ? (
+              <>
+                <option value="Sunrise Contractors">Sunrise Contractors</option>
+                <option value="GreenGrid Builders">GreenGrid Builders</option>
+              </>
+            ) : (
+              <>
+                <option value="Solar Solutions Ethiopia PLC">Solar Solutions Ethiopia PLC</option>
+                <option value="EthioSun Light">EthioSun Light</option>
+              </>
+            )}
           </select>
         </div>
 
@@ -428,41 +595,212 @@ const RegisterBeneficiary = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Guarantee Period (Years)</label>
-          <select 
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            value={formData.guaranteePeriod}
-            onChange={(e) => updateFormData('guaranteePeriod', e.target.value)}
-          >
-            <option value="">Select...</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="5">5</option>
-          </select>
-        </div>
+        {formData.guarantee === 'Guarantee' && (
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700">Guarantee Period (Years)</label>
+            <select 
+              className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={formData.guaranteePeriod}
+              onChange={(e) => updateFormData('guaranteePeriod', e.target.value)}
+            >
+              <option value="">Select...</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        )}
       </div>
 
        <div className="col-span-2 space-y-2 mt-4">
-          <label className="text-sm font-semibold text-slate-700">Upload Documents</label>
+           <label className="text-sm font-semibold text-slate-700">Upload Documents</label>
           <div className="grid grid-cols-2 gap-4">
-             <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer text-blue-600">
-               <UploadCloud className="w-6 h-6 text-slate-400" />
-               <span className="text-sm font-semibold text-slate-700">National ID</span>
-               <span className="text-xs">Click to upload</span>
-             </div>
-             <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer text-blue-600">
-               <UploadCloud className="w-6 h-6 text-slate-400" />
-               <span className="text-sm font-semibold text-slate-700">Proof of Residence</span>
-               <span className="text-xs">Click to upload</span>
-             </div>
+             <label className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer text-blue-600">
+               <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => updateFormData('idPhoto', e.target.files[0])} />
+               <UploadCloud className={`w-6 h-6 ${formData.idPhoto ? 'text-emerald-500' : 'text-slate-400'}`} />
+               <span className="text-sm font-semibold text-slate-700">{formData.idPhoto ? 'ID Uploaded' : 'National ID'}</span>
+               <span className="text-xs truncate max-w-full text-center px-2">{formData.idPhoto ? formData.idPhoto.name : 'Click or tap to scan ID'}</span>
+             </label>
+             <label className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer text-blue-600">
+               <input type="file" accept="image/*, application/pdf" className="hidden" onChange={(e) => updateFormData('proofPhoto', e.target.files[0])} />
+               <UploadCloud className={`w-6 h-6 ${formData.proofPhoto ? 'text-emerald-500' : 'text-slate-400'}`} />
+               <span className="text-sm font-semibold text-slate-700">{formData.proofPhoto ? 'Document Uploaded' : 'Proof of Residence'}</span>
+               <span className="text-xs truncate max-w-full text-center px-2">{formData.proofPhoto ? formData.proofPhoto.name : 'Click to upload proof'}</span>
+             </label>
           </div>
         </div>
     </div>
   );
 
-  const Step5 = () => (
+  const Step5 = () => {
+    if (formData.surveyType === 'Off-Grid') {
+      return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+           <div className="flex items-center gap-2 text-emerald-500 font-bold mb-6 border-b pb-4">
+            <Zap className="w-6 h-6" />
+            <h4 className="text-xl text-slate-800">Project Installation Information</h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Project Capacity (KW)</label>
+              <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCapacity} onChange={(e) => updateFormData('projectCapacity', e.target.value)} />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Project Cost</label>
+              <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCost} onChange={(e) => updateFormData('projectCost', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Date of Installation / Construction Year</label>
+              <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.installationDate} onChange={(e) => updateFormData('installationDate', e.target.value)} />
+            </div>
+
+            {formData.offGridType === 'Hydro Power' && (
+              <>
+                <div className="col-span-2 mt-4 pt-4 border-t">
+                   <h5 className="font-bold text-slate-700 mb-4">Hydro Power Details</h5>
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Hydro Power Type</label>
+                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.hydroPowerType} onChange={(e) => updateFormData('hydroPowerType', e.target.value)}>
+                    <option value="">Select...</option>
+                    <option value="Pico Hydro Power <=5KW">Pico Hydro Power {"<="}5KW</option>
+                    <option value="Micro Hydro Power 5-100KW">Micro Hydro Power 5-100KW</option>
+                    <option value="Mini Hydro Power 100-1000KW">Mini Hydro Power 100-1000KW</option>
+                    <option value="Small Hydro Power 1000-10000KW">Small Hydro Power 1000-10000KW</option>
+                    <option value="Medium Hydro Power 10-100MW">Medium Hydro Power 10-100MW</option>
+                    <option value="Large /Mega Hydro Power 100MW and above">Large /Mega Hydro Power 100MW and above</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Minimum Flow (M3/sec)</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.minimumFlow} onChange={(e) => updateFormData('minimumFlow', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Head (m)</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.hydroHead} onChange={(e) => updateFormData('hydroHead', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Estimated Power output (KW)</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.estimatedPowerOutput} onChange={(e) => updateFormData('estimatedPowerOutput', e.target.value)} />
+                </div>
+              </>
+            )}
+
+            {formData.offGridType === 'Solar Grid' && (
+              <>
+                <div className="col-span-2 mt-4 pt-4 border-t">
+                   <h5 className="font-bold text-slate-700 mb-4">Solar Panel Information</h5>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Solar Panel Type</label>
+                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.solarPanelType} onChange={(e) => updateFormData('solarPanelType', e.target.value)}>
+                     <option value="">Select...</option>
+                     <option value="Mon Crystal">Mon Crystal</option>
+                     <option value="Poly Crystal">Poly Crystal</option>
+                     <option value="Amorphas">Amorphas</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">No of Solar Panel</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfSolarPanel} onChange={(e) => updateFormData('noOfSolarPanel', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Solar Panel Manufacture</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelManufacture} onChange={(e) => updateFormData('solarPanelManufacture', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Solar Panel Model</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelModel} onChange={(e) => updateFormData('solarPanelModel', e.target.value)} />
+                </div>
+
+                <div className="col-span-2 mt-4 pt-4 border-t">
+                   <h5 className="font-bold text-slate-700 mb-4">Battery Information</h5>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Battery Type</label>
+                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.batteryType} onChange={(e) => updateFormData('batteryType', e.target.value)}>
+                     <option value="">Select...</option>
+                     <option value="Lead Acid">Lead Acid</option>
+                     <option value="Lithium Ion">Lithium Ion</option>
+                     <option value="Jel Type">Jel Type</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">No of Battery</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfBattery} onChange={(e) => updateFormData('noOfBattery', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Battery Manufacture</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryManufacture} onChange={(e) => updateFormData('batteryManufacture', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Battery Model</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryModel} onChange={(e) => updateFormData('batteryModel', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Battery Capacity (Ahr)</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryCapacity} onChange={(e) => updateFormData('batteryCapacity', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Total Energy of Batter (KWhr)</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.totalEnergyOfBattery} onChange={(e) => updateFormData('totalEnergyOfBattery', e.target.value)} />
+                </div>
+
+                <div className="col-span-2 mt-4 pt-4 border-t">
+                   <h5 className="font-bold text-slate-700 mb-4">Inverter & System Information</h5>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">System Voltage (V)</label>
+                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.systemVoltage} onChange={(e) => updateFormData('systemVoltage', e.target.value)}>
+                     <option value="">Select...</option>
+                     <option value="12V">12V</option>
+                     <option value="24V">24V</option>
+                     <option value="48V">48V</option>
+                     <option value="96V">96V</option>
+                     <option value="112V">112V</option>
+                     <option value="120V">120V</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Inverter Type</label>
+                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.inverterType} onChange={(e) => updateFormData('inverterType', e.target.value)}>
+                     <option value="">Select...</option>
+                     <option value="Off Gride">Off Gride</option>
+                     <option value="On Gride">On Gride</option>
+                     <option value="High Bride">High Bride</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Invertor Manufacture</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterManufacture} onChange={(e) => updateFormData('inverterManufacture', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Inverter Mode</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterMode} onChange={(e) => updateFormData('inverterMode', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">No of Inverter/Charge Controller</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfInverter} onChange={(e) => updateFormData('noOfInverter', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Inverter Capacity (KW)</label>
+                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterCapacity} onChange={(e) => updateFormData('inverterCapacity', e.target.value)} />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-semibold text-slate-700">Breaker Board (SDB)</label>
+                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.breakerBoard} onChange={(e) => updateFormData('breakerBoard', e.target.value)} />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
        <div className="flex items-center gap-2 text-blue-400 font-bold mb-4">
         <Zap className="w-5 h-5" />
@@ -518,6 +856,7 @@ const RegisterBeneficiary = () => {
       </div>
     </div>
   );
+};
 
   const Step6 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -543,11 +882,11 @@ const RegisterBeneficiary = () => {
           </div>
            <div>
             <span className="text-xs text-blue-500 block mb-1">Beneficiary / Institution</span>
-            <span className="font-bold text-blue-900">{formData.fullName || '-'}</span>
+            <span className="font-bold text-blue-900">{formData.surveyType === 'Institution' ? formData.institutionName : formData.fullName || '-'}</span>
           </div>
            <div>
             <span className="text-xs text-blue-500 block mb-1">Equipment Type</span>
-            <span className="font-bold text-blue-900">{formData.equipmentType || '-'}</span>
+            <span className="font-bold text-blue-900">{formData.surveyType === 'Off-Grid' ? formData.offGridType : formData.equipmentType || '-'}</span>
           </div>
            <div>
             <span className="text-xs text-blue-500 block mb-1">Serial Number</span>
@@ -587,7 +926,7 @@ const RegisterBeneficiary = () => {
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 mb-6">
         <div className="min-h-[400px]">
           {currentStep === 1 && <Step1 />}
-          {currentStep > 1 && formData.surveyType !== 'Home/Lantern' ? (
+          {currentStep > 1 && !['Home/Lantern', 'Institution', 'Off-Grid'].includes(formData.surveyType) ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500 py-20">
               <AlertTriangle className="w-12 h-12 mb-4 text-blue-300" />
               <h3 className="text-xl font-bold text-slate-700">Form Not Available</h3>
@@ -629,7 +968,7 @@ const RegisterBeneficiary = () => {
             ))}
           </div>
 
-          {(currentStep > 1 && formData.surveyType !== 'Home/Lantern') ? (
+          {(currentStep > 1 && !['Home/Lantern', 'Institution', 'Off-Grid'].includes(formData.surveyType)) ? (
             <div className="px-6 py-3 opacity-0 pointer-events-none">Placeholder</div>
           ) : currentStep < 6 ? (
             <button 

@@ -1,15 +1,684 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { 
+  AlertTriangle, UploadCloud, Search, Plus, X, 
+  Eye, CheckCircle2, Wrench, AlertOctagon, ArrowLeft
+} from 'lucide-react';
+
+const ZONE_WOREDAS = {
+  "North Gondar": ["Debark", "Dabat", "Dabal", "Chilga"],
+  "South Gondar": ["Debre Tabor", "Farta", "Fogera"],
+  "North Wollo": ["Woldiya", "Kobo"],
+  "South Wollo": ["Dessie Zuria", "Kombolcha"],
+  "Awi": ["Dangila", "Injibara", "Banja"],
+  "East Gojjam": ["Debre Markos", "Bichena", "Debre Elias"],
+  "West Gojjam": ["Finote Selam", "Bure"],
+  "Wag Hemra": ["Sekota"],
+  "Oromia": ["Kemise", "Bati"],
+  "Central Gondar": ["Gondar", "Chilga"],
+  "Benshangul": ["Assosa", "Bambasi"]
+};
+
+const MAIN_CAUSES = {
+  'Home/Lantern': ['Solar Panels', 'Battery', 'Charge Control', 'Cable', 'Switch On/Off', 'Port', 'Lamp', 'Radio', 'Torch/Hand Battery', 'Tv'],
+  'Institution': ['Solar Panels', 'Battery', 'Invertor', 'Cable', 'Barker (Breaker)'],
+  'Solar Grid': ['Solar Panels', 'Battery', 'Invertor', 'Combiner Box', 'Control Board', 'Cable/Distribution System', 'Pole', 'Watt Hour Metter'],
+  'Hydro Power': ['Intake/Weier', 'Canal', 'Forbay', 'Penstock', 'Turbine', 'Generator', 'Dirving System', 'Control Board', 'Distribution System']
+};
+
+const INITIAL_MOCK_PROBLEMS = [
+  {
+    id: 'PRB-001',
+    beneficiary: 'Dereje Hailu',
+    serialNo: 'SHS-NG-007',
+    equipmentType: 'Home/Lantern',
+    equipmentTypeLabel: 'Home Solar System',
+    problemLevel: 'Not functional',
+    mainCause: 'Battery failure - deep discharge',
+    location: 'Chilga, North Gondar',
+    zone: 'North Gondar',
+    woreda: 'Chilga',
+    reported: '2024-05-22',
+    installationDate: '2023-06-15',
+    nonFunctionalDate: '2024-05-20',
+    status: 'Open',
+    reporter: 'Biruk Hailu'
+  },
+  {
+    id: 'PRB-002',
+    beneficiary: 'Tadesse Mengistu',
+    serialNo: 'SHS-AW-003',
+    equipmentType: 'Home/Lantern',
+    equipmentTypeLabel: 'Home Solar System',
+    problemLevel: 'Partially functional but in need of repair',
+    mainCause: 'Solar Panels',
+    location: 'Banja, Awi',
+    zone: 'Awi',
+    woreda: 'Banja',
+    reported: '2024-04-02',
+    installationDate: '2022-11-10',
+    nonFunctionalDate: '2024-03-25',
+    status: 'Under Repair',
+    reporter: 'Biruk Hailu'
+  },
+  {
+    id: 'PRB-003',
+    beneficiary: 'Mulugeta Assefa',
+    serialNo: 'OFF-EG-005',
+    equipmentType: 'Solar Grid',
+    equipmentTypeLabel: 'Off-grid Solar Grid',
+    problemLevel: 'Abandoned or no longer exists',
+    mainCause: 'Invertor',
+    location: 'Debre Elias, East Gojjam',
+    zone: 'East Gojjam',
+    woreda: 'Debre Elias',
+    reported: '2024-01-16',
+    installationDate: '2021-08-05',
+    nonFunctionalDate: '2023-12-10',
+    status: 'Open',
+    reporter: 'Biruk Hailu'
+  }
+];
 
 const RegisterProblem = () => {
+  const [problems, setProblems] = useState(INITIAL_MOCK_PROBLEMS);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const [formData, setFormData] = useState({
+    beneficiaryName: '',
+    serialNumber: '',
+    equipmentType: '',
+    problemLevel: '',
+    installationDate: '',
+    nonFunctionalDate: '',
+    zone: '',
+    woreda: '',
+    mainCause: '',
+    repairDate: '',
+    functionalAgainDate: '',
+    problemDescription: '',
+    photo: null
+  });
+
+  const updateFormData = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'zone') {
+      setFormData(prev => ({ ...prev, woreda: '' }));
+    }
+    if (field === 'equipmentType') {
+      setFormData(prev => ({ ...prev, mainCause: '' }));
+    }
+    if (field === 'problemLevel') {
+      // Reset mutually exclusive fields when problem level changes
+      setFormData(prev => ({
+        ...prev,
+        mainCause: '',
+        nonFunctionalDate: '',
+        functionalAgainDate: '',
+        problemDescription: '',
+        photo: null
+      }));
+    }
+  };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'Open': return 'text-red-600 bg-red-50 border-red-200';
+      case 'Under Repair': return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'Resolved': return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+      default: return 'text-slate-600 bg-slate-50 border-slate-200';
+    }
+  };
+
+  const getProblemLevelStyle = (level) => {
+    if (level?.includes('Not functional')) return 'text-red-700 font-medium bg-red-50 px-2 py-1 rounded text-sm';
+    if (level?.includes('Partially')) return 'text-orange-700 font-medium bg-orange-50 px-2 py-1 rounded text-sm';
+    if (level?.includes('Abandoned')) return 'text-slate-600 font-medium bg-slate-100 px-2 py-1 rounded text-sm';
+    return 'text-slate-700 font-medium text-sm';
+  };
+
+  const filteredProblems = useMemo(() => {
+    return problems.filter(p => {
+      const matchSearch = p.beneficiary.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          p.serialNo.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = statusFilter ? p.status === statusFilter : true;
+      return matchSearch && matchStatus;
+    });
+  }, [problems, searchQuery, statusFilter]);
+
+  const stats = {
+    open: problems.filter(p => p.status === 'Open').length,
+    repair: problems.filter(p => p.status === 'Under Repair').length,
+    resolved: problems.filter(p => p.status === 'Resolved').length
+  };
+
+  const updateProblemStatus = (id, newStatus) => {
+    setProblems(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+    setSelectedProblem(prev => prev && prev.id === id ? { ...prev, status: newStatus } : prev);
+  };
+
+  // ----- DETAIL VIEW -----
+  if (selectedProblem) {
+    return (
+      <div className="max-w-7xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-center gap-4 mb-8">
+          <button 
+            onClick={() => setSelectedProblem(null)}
+            className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-500"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-slate-800">{selectedProblem.beneficiary}</h2>
+            <p className="text-slate-500 text-sm">{selectedProblem.id} · Reported {selectedProblem.reported}</p>
+          </div>
+          <span className={`px-4 py-1.5 rounded-full text-sm font-bold border ${getStatusStyle(selectedProblem.status)}`}>
+            {selectedProblem.status}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          {/* Equipment Details Card */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">Equipment Details</h3>
+            <div className="space-y-6 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Serial Number</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.serialNo}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Equipment Type</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.equipmentTypeLabel}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Problem Level</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.problemLevel}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Main Cause</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.mainCause || '-'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Installation Date</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.installationDate || '-'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Non-Functional Date</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.nonFunctionalDate || '-'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Location & Reporter Card */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">Location & Reporter</h3>
+            <div className="space-y-6 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Zone</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.zone}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Woreda</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.woreda}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Reported By</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.reporter || 'System User'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Reported Date</span>
+                <span className="font-semibold text-slate-800">{selectedProblem.reported}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Repair Date</span>
+                <span className="font-semibold text-slate-800">Not yet</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Functional Again</span>
+                <span className="font-semibold text-slate-800">Not yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Update Status Card */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Update Status</h3>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => updateProblemStatus(selectedProblem.id, 'Open')}
+              className={`px-6 py-2.5 rounded-full font-bold transition-all text-sm ${
+                selectedProblem.status === 'Open' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Open
+            </button>
+            <button 
+              onClick={() => updateProblemStatus(selectedProblem.id, 'Under Repair')}
+              className={`px-6 py-2.5 rounded-full font-bold transition-all text-sm ${
+                selectedProblem.status === 'Under Repair' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Under Repair
+            </button>
+            <button 
+              onClick={() => updateProblemStatus(selectedProblem.id, 'Resolved')}
+              className={`px-6 py-2.5 rounded-full font-bold transition-all text-sm ${
+                selectedProblem.status === 'Resolved' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Resolved
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ----- MAIN VIEW -----
   return (
-    <div className="max-w-7xl mx-auto">
-      <h3 className="text-2xl font-bold mb-6">Problem Registry</h3>
-      <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-slate-200">
-        <p className="text-slate-600 mb-4">
-          Welcome to the Problem Registry. Here you can log and track issues or complaints reported within the woreda.
-        </p>
-        <div className="h-64 border-2 border-dashed border-slate-200 rounded flex items-center justify-center text-slate-400">
-          Problem Logging Form / Issues Table will go here
+    <div className="max-w-7xl mx-auto pb-12">
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800">Problem Register</h3>
+          <p className="text-slate-500">Report and track equipment non-functionality issues</p>
+        </div>
+        <button 
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all"
+        >
+          {showForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+          {showForm ? 'Close Form' : 'Report Problem'}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="bg-red-50 border border-red-100 p-6 rounded-2xl flex flex-col justify-center">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-red-600">{stats.open}</h2>
+              <p className="text-red-800 font-medium mt-1">Open Issues</p>
+            </div>
+            <div className="p-3 bg-red-100 rounded-xl">
+              <AlertOctagon className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-yellow-50 border border-yellow-100 p-6 rounded-2xl flex flex-col justify-center">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-yellow-600">{stats.repair}</h2>
+              <p className="text-yellow-800 font-medium mt-1">Under Repair</p>
+            </div>
+            <div className="p-3 bg-yellow-100 rounded-xl">
+              <Wrench className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl flex flex-col justify-center">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-emerald-600">{stats.resolved}</h2>
+              <p className="text-emerald-800 font-medium mt-1">Resolved</p>
+            </div>
+            <div className="p-3 bg-emerald-100 rounded-xl">
+              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mb-8 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between bg-slate-50">
+            <h4 className="font-bold text-slate-800 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-blue-600" />
+              Register Equipment Problem
+            </h4>
+            <button onClick={() => setShowForm(false)} className="p-1 hover:bg-slate-200 rounded-lg text-slate-400">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Beneficiary Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="Full name of beneficiary"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.beneficiaryName}
+                  onChange={(e) => updateFormData('beneficiaryName', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Equipment Serial Number *</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. SHS-NG-007"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.serialNumber}
+                  onChange={(e) => updateFormData('serialNumber', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Equipment Type *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={formData.equipmentType}
+                  onChange={(e) => updateFormData('equipmentType', e.target.value)}
+                >
+                  <option value="">Select Type</option>
+                  <option value="Home/Lantern">Home and Lantern System</option>
+                  <option value="Institution">Institution</option>
+                  <option value="Solar Grid">Off Grid - Solar Grid</option>
+                  <option value="Hydro Power">Off Grid - Hydro Power</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Problem Level *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={formData.problemLevel}
+                  onChange={(e) => updateFormData('problemLevel', e.target.value)}
+                >
+                  <option value="">Select Level</option>
+                  <option value="Functional">Functional</option>
+                  <option value="Partially functional but in need of repair">Partially functional but in need of repair</option>
+                  <option value="Not functional">Not functional</option>
+                  <option value="Abandoned or no longer exists">Abandoned or no longer exists</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Installation Date *</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600"
+                  value={formData.installationDate}
+                  onChange={(e) => updateFormData('installationDate', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Non-Functional Date *</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600 bg-white"
+                  value={formData.nonFunctionalDate}
+                  onChange={(e) => updateFormData('nonFunctionalDate', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Zone *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={formData.zone}
+                  onChange={(e) => updateFormData('zone', e.target.value)}
+                >
+                  <option value="">Select Zone</option>
+                  {Object.keys(ZONE_WOREDAS).map(zone => (
+                    <option key={zone} value={zone}>{zone}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Woreda *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={formData.woreda}
+                  onChange={(e) => updateFormData('woreda', e.target.value)}
+                  disabled={!formData.zone}
+                >
+                  <option value="">{formData.zone ? "Select Woreda" : "Select Zone first"}</option>
+                  {formData.zone && ZONE_WOREDAS[formData.zone].map(woreda => (
+                    <option key={woreda} value={woreda}>{woreda}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Main Cause *</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  value={formData.mainCause}
+                  onChange={(e) => updateFormData('mainCause', e.target.value)}
+                  disabled={!formData.equipmentType}
+                >
+                  <option value="">{formData.equipmentType ? "Select Cause" : "Select equipment type first"}</option>
+                  {formData.equipmentType && MAIN_CAUSES[formData.equipmentType]?.map(cause => (
+                    <option key={cause} value={cause}>{cause}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Repair Date (if applicable)</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600 bg-white"
+                  value={formData.repairDate}
+                  onChange={(e) => updateFormData('repairDate', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">System Functional Again Date</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600 bg-white"
+                  value={formData.functionalAgainDate}
+                  onChange={(e) => updateFormData('functionalAgainDate', e.target.value)}
+                />
+              </div>
+
+              <div className="col-span-2 space-y-2 mt-2">
+                <label className="text-sm font-semibold text-slate-700">Upload Photo (Optional)</label>
+                <label className="w-full h-32 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={(e) => updateFormData('photo', e.target.files[0])} 
+                  />
+                  <UploadCloud className={`w-8 h-8 mb-2 ${formData.photo ? 'text-emerald-500' : ''}`} />
+                  <span className="font-semibold">{formData.photo ? 'Photo Ready' : 'Click to upload equipment photo'}</span>
+                  <span className="text-xs mt-1">{formData.photo ? formData.photo.name : 'JPG, PNG up to 10MB'}</span>
+                </label>
+              </div>
+
+              {formData.problemLevel === 'Functional' && (
+                <div className="col-span-2 space-y-4 mt-8 p-6 border-t border-slate-200 bg-slate-50/50 rounded-b-xl">
+                   <h5 className="font-bold text-slate-800">Additional Survey Information</h5>
+                   <div className="space-y-2">
+                     <label className="text-sm text-slate-700 block font-semibold">Enter the date you started working again after stopping.</label>
+                     <input 
+                      type="date"
+                      className="w-1/2 p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600 bg-white"
+                      value={formData.functionalAgainDate}
+                      onChange={(e) => updateFormData('functionalAgainDate', e.target.value)}
+                    />
+                   </div>
+                </div>
+              )}
+
+              {['Partially functional but in need of repair', 'Not functional', 'Abandoned or no longer exists'].includes(formData.problemLevel) && (
+                <div className="col-span-2 grid grid-cols-2 gap-6 mt-8 p-6 border-t border-slate-200 bg-slate-50/50 rounded-b-xl">
+                  <div className="col-span-2">
+                    <h5 className="font-bold text-slate-800">Additional Survey Information</h5>
+                  </div>
+                   
+                  <div className="col-span-2 space-y-2">
+                    <label className="text-sm font-semibold text-slate-700">Main cause of non-functionality or partial functionality*</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 mt-2">
+                      {!formData.equipmentType ? (
+                         <p className="text-sm text-slate-500 italic col-span-full">Select equipment type first to see causes.</p>
+                      ) : (
+                         MAIN_CAUSES[formData.equipmentType]?.map(cause => (
+                          <label key={cause} className="flex items-center gap-2 bg-white shadow-sm p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-blue-400">
+                             <input 
+                               type="radio" 
+                               name="mainCause" 
+                               value={cause}
+                               checked={formData.mainCause === cause}
+                               onChange={(e) => updateFormData('mainCause', e.target.value)}
+                               className="text-blue-600 focus:ring-blue-500"
+                             />
+                             <span className="text-sm text-slate-700">{cause}</span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700">set non functionality date?</label>
+                    <input 
+                      type="date"
+                      className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600 bg-white"
+                      value={formData.nonFunctionalDate}
+                      onChange={(e) => updateFormData('nonFunctionalDate', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700">Describe the functionality problem/s</label>
+                    <input 
+                      type="text" 
+                      placeholder="Brief description..."
+                      className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      value={formData.problemDescription}
+                      onChange={(e) => updateFormData('problemDescription', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-2 mt-4">
+                    <label className="text-sm font-semibold text-slate-700">Please take a picture illustrating the non-functionality or partial functionality</label>
+                    <label className="w-full h-32 bg-white border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:bg-blue-50/20 transition-colors cursor-pointer">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => updateFormData('photo', e.target.files[0])} 
+                      />
+                      <UploadCloud className={`w-8 h-8 mb-2 ${formData.photo ? 'text-emerald-500' : ''}`} />
+                      <span className="font-semibold">{formData.photo ? 'Photo Ready' : 'Click to upload equipment photo'}</span>
+                      <span className="text-xs mt-1">{formData.photo ? formData.photo.name : 'JPG, PNG up to 10MB'}</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-8 flex gap-4">
+              <button 
+                onClick={() => setShowForm(false)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-colors"
+               >
+                Submit Problem Report
+              </button>
+              <button 
+                onClick={() => setShowForm(false)}
+                className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-xl font-bold transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search problems by beneficiary or serial..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <select 
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-slate-700"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="Open">Open</option>
+            <option value="Under Repair">Under Repair</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-slate-500 font-semibold text-xs tracking-wider">
+              <tr>
+                <th className="p-4">BENEFICIARY</th>
+                <th className="p-4">SERIAL NO.</th>
+                <th className="p-4">EQUIPMENT TYPE</th>
+                <th className="p-4">PROBLEM LEVEL</th>
+                <th className="p-4">LOCATION</th>
+                <th className="p-4">REPORTED</th>
+                <th className="p-4">STATUS</th>
+                <th className="p-4 text-center"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredProblems.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="p-8 text-center text-slate-500">
+                    No problems match your search or filter.
+                  </td>
+                </tr>
+              ) : filteredProblems.map((prob) => (
+                <tr key={prob.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-50 text-red-500 rounded-lg shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-800">{prob.beneficiary}</div>
+                        <div className="text-xs text-slate-400">{prob.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4 font-medium text-slate-600">{prob.serialNo}</td>
+                  <td className="p-4 font-bold text-blue-600 text-xs">{prob.equipmentTypeLabel}</td>
+                  <td className="p-4 whitespace-nowrap">
+                    <span className={getProblemLevelStyle(prob.problemLevel)}>
+                      {prob.problemLevel.length > 20 ? prob.problemLevel.slice(0,20)+'...' : prob.problemLevel}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="text-slate-800 font-medium">{prob.location.split(',')[0]}</div>
+                    <div className="text-xs text-slate-400">{prob.location.split(',')[1]?.trim()}</div>
+                  </td>
+                  <td className="p-4 text-slate-500">{prob.reported}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(prob.status)}`}>
+                      {prob.status}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <button 
+                      onClick={() => setSelectedProblem(prob)}
+                      className="p-2 hover:bg-slate-100 rounded-lg text-blue-500 transition-colors"
+                      title="View Details"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
