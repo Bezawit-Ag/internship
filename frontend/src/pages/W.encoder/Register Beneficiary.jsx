@@ -59,7 +59,7 @@ const RegisterBeneficiary = () => {
     serialNumber: '',
     assignedSupplier: '',
     unitPrice: '',
-    guarantee: 'Guarantee',
+    guarantee: '',
     guaranteePeriod: '',
     installationDate: '',
     installerName: '',
