@@ -5,6 +5,29 @@ from typing import List, Optional
 class SupplierResponse(BaseModel):
     id: int
     name: str
+    license_number: Optional[str] = None
+    service_type: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    company_type: Optional[str] = None
+    score: Optional[int] = 0
+    status: Optional[str] = 'Active'
+
+class SupplierCreate(BaseModel):
+    name: str
+    contact_person: str
+    contact_phone: str
+    license_number: str
+    email: str
+    address: str
+    service_type: str
+    company_type: Optional[str] = "Private Limited"
+
+class SupplierDetailsResponse(SupplierResponse):
+    coverage_zones: List[str] = []
+    coverage_woredas: List[str] = []
 
 class ZoneResponse(BaseModel):
     id: int

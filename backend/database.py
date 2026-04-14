@@ -77,7 +77,16 @@ def init_db():
     c.execute('''
         CREATE TABLE suppliers (
             id INTEGER PRIMARY KEY AUTO_INCREMENT,
-            name VARCHAR(255) NOT NULL
+            name VARCHAR(255) NOT NULL,
+            license_number VARCHAR(100),
+            service_type VARCHAR(100),
+            contact_person VARCHAR(255),
+            contact_phone VARCHAR(50),
+            email VARCHAR(255),
+            address VARCHAR(255),
+            company_type VARCHAR(100),
+            score INTEGER DEFAULT 0,
+            status VARCHAR(50) DEFAULT 'Active'
         );
     ''')
 

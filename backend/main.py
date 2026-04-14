@@ -126,6 +126,78 @@ def get_dashboard_data():
         return {"error": f"Database connection failed: {str(e)}"}
     except Exception as e:
         return {"error": str(e)}
+# 4.5️⃣ Supplier Management routes
+@app.get("/api/suppliers", response_model=list[schemas.SupplierDetailsResponse])
+def get_suppliers():
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        c.execute("SELECT * FROM suppliers ORDER BY id DESC")
+        suppliers = list(c.fetchall())
+        
+        # for each supplier, find their coverage areas
+        for sup in suppliers:
+            c.execute('''
+                SELECT z.name as zone, w.name as woreda 
+                FROM area_assignments a
+                JOIN zones z ON a.zone_id = z.id
+                JOIN woredas w ON a.woreda_id = w.id
+                WHERE a.supplier_id = %s
+            ''', (sup['id'],))
+            assignments = c.fetchall()
+            zones = list(set([a['zone'] for a in assignments]))
+            woredas = list(set([a['woreda'] for a in assignments]))
+            sup['coverage_zones'] = zones
+            sup['coverage_woredas'] = woredas
+            
+        conn.close()
+        return suppliers
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/suppliers/{supplier_id}", response_model=schemas.SupplierDetailsResponse)
+def get_supplier_details(supplier_id: int):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        c.execute("SELECT * FROM suppliers WHERE id = %s", (supplier_id,))
+        supplier = c.fetchone()
+        if not supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+            
+        c.execute('''
+            SELECT z.name as zone, w.name as woreda 
+            FROM area_assignments a
+            JOIN zones z ON a.zone_id = z.id
+            JOIN woredas w ON a.woreda_id = w.id
+            WHERE a.supplier_id = %s
+        ''', (supplier_id,))
+        assignments = c.fetchall()
+        supplier['coverage_zones'] = list(set([a['zone'] for a in assignments]))
+        supplier['coverage_woredas'] = list(set([a['woreda'] for a in assignments]))
+        
+        conn.close()
+        return supplier
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/suppliers")
+def create_supplier(supplier: schemas.SupplierCreate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO suppliers (name, contact_person, contact_phone, license_number, email, address, service_type, company_type, score, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0, 'Active')
+        ''', (supplier.name, supplier.contact_person, supplier.contact_phone, supplier.license_number, supplier.email, supplier.address, supplier.service_type, supplier.company_type))
+        conn.commit()
+        last_id = c.lastrowid
+        conn.close()
+        return {"message": "Supplier registered successfully", "id": last_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # 5️⃣ Area Assignment routes

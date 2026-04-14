@@ -6,6 +6,7 @@ import DashboardCards from './pages/super-admin/Dashboard/DashboardCards';
 import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart, FunctionalStatusChart } from './pages/super-admin/Dashboard/Charts';
 import ActivityLog from './pages/super-admin/Dashboard/ActivityLog';
 import AreaAssignment from './pages/super-admin/Area assignment/AreaAssignment';
+import SupplierManagement from './pages/super-admin/Supplier management';
 import WoredaEncoderDashboard from './pages/W.encoder/Dashboard';
 import WoredaApproverDashboard from './pages/W.approver/Dashboard';
 import ZoneEncoderDashboard from './pages/Z.encoder/Dashboard';
@@ -36,7 +37,9 @@ function SuperAdminApp() {
         <Header />
 
         <main className="flex-1 p-8 overflow-y-auto">
-          {activeMenu === "Area Assignment" ? (
+          {activeMenu === "Supplier Management" ? (
+            <SupplierManagement />
+          ) : activeMenu === "Area Assignment" ? (
             <AreaAssignment />
           ) : activeMenu === "Dashboard" ? (
             loading ? (
