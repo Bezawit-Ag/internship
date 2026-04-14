@@ -18,7 +18,7 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
         <div className="flex items-center gap-3 font-bold text-lg text-primary">
           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
             {/* Logo icon representation */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5v14M7 5v14M22 8v8M2 8v8"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5v14M7 5v14M22 8v8M2 8v8" /></svg>
           </div>
           <div className="leading-tight">
             <span className="block text-slate-800">SEDMS</span>
@@ -40,11 +40,10 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
           <button
             key={i}
             onClick={() => setActiveMenu(item.name)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              activeMenu === item.name 
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeMenu === item.name
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-            }`}
+              }`}
           >
             <item.icon className="w-4 h-4" />
             {item.name}
@@ -53,14 +52,14 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
       </nav>
 
       <div className="p-4 border-t border-slate-100 flex flex-col gap-2">
-         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Collapse
-         </button>
-         <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors">
-            <LogOut className="w-4 h-4" />
-            Sign Out
-         </button>
+        <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
+          <ChevronLeft className="w-4 h-4" />
+          Collapse
+        </button>
+        <button className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors">
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
       </div>
     </aside>
   );

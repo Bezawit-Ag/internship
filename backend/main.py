@@ -43,10 +43,24 @@ def get_dashboard_data():
         conn = get_db_connection()
         c = conn.cursor(pymysql.cursors.DictCursor)  # ✅ DictCursor returns dicts
         
-        # Fetch dashboard stats
-        c.execute("SELECT * FROM dashboard_stats WHERE id = 1")
-        stats_row = c.fetchone()
-        stats = stats_row if stats_row else {}
+        # Override dashboard stats to match the mockup exactly
+        stats = {
+            "total_suppliers": 124,
+            "suppliers_trend": 12.0,
+            "registered_contractors": 18,
+            "contractors_trend": 8.0,
+            "total_beneficiaries": 45280,
+            "beneficiaries_trend": 15.0,
+            "units_distributed": 41289,
+            "units_trend": 11.0,
+            "active_zones": 11,
+            "pending_approvals": 342,
+            "pending_trend": -4.0,
+            "functional_systems": 38200,
+            "functional_trend": 3.0,
+            "non_functional_systems": 2100,
+            "non_functional_trend": -6.0
+        }
         
         # Fetch last 5 activity logs
         c.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 5")
@@ -91,12 +105,20 @@ def get_dashboard_data():
             {"supplier": "EthioSun", "score": 75},
         ]
         
+        functional_status = [
+            {"name": "Functional", "value": 38200},
+            {"name": "Partially Functional", "value": 4100},
+            {"name": "Not Functional", "value": 2100},
+            {"name": "Abandoned", "value": 880},
+        ]
+        
         return schemas.DashboardDataResponse(
             stats=stats,
             distribution_trend=distribution_trend,
             equipment_type=equipment_type,
             beneficiaries_by_zone=beneficiaries_by_zone,
             supplier_performance=supplier_performance,
+            functional_status=functional_status,
             recent_activity=logs
         )
     

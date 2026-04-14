@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export function DistributionTrendChart({ data }) {
   if (!data) return null;
   return (
-     <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-50">
+     <div className="lg:col-span-2 group bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-slate-200 transition-all duration-400 ease-out">
         <div className="flex justify-between items-start mb-6">
            <div>
               <h3 className="font-bold text-slate-800">Distribution Trend</h3>
@@ -44,7 +44,7 @@ export function EquipmentTypeChart({ data }) {
   const COLORS = ['#3b82f6', '#06b6d4', '#6366f1', '#a855f7'];
   
   return (
-     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-50">
+     <div className="group bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-slate-200 transition-all duration-400 ease-out">
         <h3 className="font-bold text-slate-800">Equipment Type</h3>
         <p className="text-xs text-slate-400 font-medium mt-1 mb-6">All equipment types</p>
         
@@ -87,7 +87,7 @@ export function EquipmentTypeChart({ data }) {
 export function BeneficiariesBarChart({ data }) {
   if (!data) return null;
   return (
-     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-50 h-full">
+     <div className="group bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-slate-200 transition-all duration-400 ease-out h-full">
         <h3 className="font-bold text-slate-800">Beneficiaries by Zone</h3>
         <p className="text-xs text-slate-400 font-medium mt-1 mb-6">Total enrolled per administrative zone</p>
         
@@ -109,7 +109,7 @@ export function BeneficiariesBarChart({ data }) {
 export function SupplierPerformanceChart({ data }) {
   if (!data) return null;
   return (
-     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-50 h-full">
+     <div className="group bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-slate-200 transition-all duration-400 ease-out h-full">
         <h3 className="font-bold text-slate-800">Supplier Performance</h3>
         <p className="text-xs text-slate-400 font-medium mt-1 mb-6">Score & units delivered per supplier</p>
         
@@ -123,6 +123,50 @@ export function SupplierPerformanceChart({ data }) {
                  <Bar dataKey="score" fill="#3b82f6" radius={[0, 4, 4, 0]} />
               </BarChart>
            </ResponsiveContainer>
+        </div>
+     </div>
+  );
+}
+
+export function FunctionalStatusChart({ data }) {
+  if (!data) return null;
+  const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#64748b'];
+  
+  return (
+     <div className="group bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-slate-200 transition-all duration-400 ease-out h-full">
+        <h3 className="font-bold text-slate-800">Functional Status Analysis</h3>
+        <p className="text-xs text-slate-400 font-medium mt-1 mb-6">System functionality overview</p>
+        
+        <div className="h-48 w-full flex justify-center items-center">
+           <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                 <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={0}
+                    outerRadius={80}
+                    dataKey="value"
+                 >
+                    {data.map((entry, index) => (
+                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="transparent" />
+                    ))}
+                 </Pie>
+                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
+              </PieChart>
+           </ResponsiveContainer>
+        </div>
+        
+        <div className="mt-4 flex flex-col gap-2 px-2">
+           {data.map((entry, index) => (
+              <div key={index} className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                 <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                    {entry.name}
+                 </div>
+                 <span className="font-bold text-slate-800">{entry.value.toLocaleString()}</span>
+              </div>
+           ))}
         </div>
      </div>
   );

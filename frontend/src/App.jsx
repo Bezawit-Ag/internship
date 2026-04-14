@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './pages/super-admin/Dashboard/components/Sidebar';
 import Header from './pages/super-admin/Dashboard/components/Header';
 import DashboardCards from './pages/super-admin/Dashboard/DashboardCards';
-import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart } from './pages/super-admin/Dashboard/Charts';
+import { DistributionTrendChart, EquipmentTypeChart, BeneficiariesBarChart, SupplierPerformanceChart, FunctionalStatusChart } from './pages/super-admin/Dashboard/Charts';
 import ActivityLog from './pages/super-admin/Dashboard/ActivityLog';
 import AreaAssignment from './pages/super-admin/Area assignment/AreaAssignment';
 import WoredaEncoderDashboard from './pages/W.encoder/Dashboard';
@@ -54,9 +54,10 @@ function SuperAdminApp() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
                   <BeneficiariesBarChart data={data.beneficiaries_by_zone} />
                   <SupplierPerformanceChart data={data.supplier_performance} />
+                  <FunctionalStatusChart data={data.functional_status} />
                 </div>
 
                 {/* <ActivityLog activities={data.recent_activity} /> */}
