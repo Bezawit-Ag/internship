@@ -159,6 +159,37 @@ const RegisterProblem = () => {
     setSelectedProblem(prev => prev && prev.id === id ? { ...prev, status: newStatus } : prev);
   };
 
+  const submitProblem = async () => {
+    try {
+      const payload = {
+        equipment: formData.equipmentType || 'Unknown',
+        title: formData.problemLevel || 'Reported Issue',
+        category: formData.mainCause || formData.problemDescription || 'Uncategorized',
+        zone: formData.zone,
+        woreda: formData.woreda,
+        kebele: '-',
+        urgency: formData.problemLevel?.includes('Not functional') ? 'High' : 'Medium',
+        beneficiary_name: formData.beneficiaryName || 'Unknown',
+        submitted_by: 'Woreda Encoder',
+        status: 'Open',
+        details_json: JSON.stringify(formData)
+      };
+
+      const res = await fetch('http://localhost:8000/api/problems', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        alert("Problem successfully registered!");
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error submitting problem");
+    }
+  };
+
   // ----- DETAIL VIEW -----
   if (selectedProblem) {
     return (
@@ -575,7 +606,7 @@ const RegisterProblem = () => {
             
             <div className="mt-8 flex gap-4">
               <button 
-                onClick={() => setShowForm(false)}
+                onClick={submitProblem}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-colors"
                >
                 Submit Problem Report

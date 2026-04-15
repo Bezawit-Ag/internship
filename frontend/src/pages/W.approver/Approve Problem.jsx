@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
-import { Search, Clock, CheckCircle, MessageSquareWarning } from 'lucide-react';
-
-const initialProblems = [
-  { id: 1, title: "Delayed Solar Panel Delivery", category: "Logistics", kebele: "01", submittedBy: "Encoder_01", status: "Pending", urgency: "High", date: "2023-11-04" },
-  { id: 2, title: "Faulty Battery Component", category: "Hardware", kebele: "03", submittedBy: "Encoder_03", status: "Pending", urgency: "Medium", date: "2023-11-04" },
-  { id: 3, title: "Beneficiary Address Mismatch", category: "Data Issue", kebele: "02", submittedBy: "Encoder_02", status: "Pending", urgency: "Low", date: "2023-11-05" },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, AlertOctagon, Wrench, CheckCircle2, FileText, Eye } from 'lucide-react';
+import ProblemDetailsModal from '../../components/ProblemDetailsModal';
 
 const ApproveProblem = () => {
   const [problems, setProblems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [zoneFilter, setZoneFilter] = useState('All Zones');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [activeProblem, setActiveProblem] = useState(null);
 
   useEffect(() => {
     fetchProblems();
@@ -17,9 +15,9 @@ const ApproveProblem = () => {
 
   const fetchProblems = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/problems');
-      if (res.ok) {
-        const data = await res.json();
+      const res = await fetch(`http://localhost:8000/api/problems`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setProblems(data);
       }
     } catch (e) {
@@ -27,14 +25,15 @@ const ApproveProblem = () => {
     }
   };
 
-  const updateStatus = async (id, status) => {
+  const handleStatusUpdate = async (problem, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/problems/${id}/status`, {
+      const res = await fetch(`http://localhost:8000/api/problems/${problem.id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
+        setActiveProblem(null);
         fetchProblems();
       }
     } catch (e) {
@@ -42,102 +41,149 @@ const ApproveProblem = () => {
     }
   };
 
-  const handleAcknowledge = (id) => updateStatus(id, 'Acknowledged');
-  const handleResolve = (id) => updateStatus(id, 'Resolved');
+  const filtered = problems.filter(p => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch = p.beneficiary_name?.toLowerCase().includes(term) || 
+      p.equipment?.toLowerCase().includes(term);
+    const matchZone = zoneFilter === 'All Zones' ? true : p.zone === zoneFilter;
+    const matchStatus = statusFilter === 'All Status' ? true : p.status === statusFilter;
+    return matchSearch && matchZone && matchStatus;
+  });
 
-  const filtered = problems.filter(p => p.title?.toLowerCase().includes(searchTerm.toLowerCase()));
-  const pendingCount = problems.filter(p => p.status === 'Pending').length;
+  const uniqueZones = [...new Set(problems.map(p => p.zone).filter(Boolean))];
+  const uniqueStatuses = [...new Set(problems.map(p => p.status).filter(Boolean))];
+
+  const stats = {
+    total: problems.length,
+    open: problems.filter(p => p.status === 'Open' || p.status === 'Pending').length,
+    repair: problems.filter(p => p.status === 'Under Repair').length,
+    resolved: problems.filter(p => p.status === 'Resolved').length
+  };
+
+  const getStatusColor = (status) => {
+    if (status === 'Open' || status === 'Pending') return 'text-red-700 bg-red-50 border-red-200';
+    if (status === 'Under Repair') return 'text-amber-700 bg-amber-50 border-amber-200';
+    if (status === 'Acknowledged') return 'text-blue-700 bg-blue-50 border-blue-200';
+    if (status === 'Resolved') return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+    return 'text-slate-600 bg-slate-50 border-slate-200';
+  };
+
+  const actionConfig = [
+    { label: 'Acknowledge Issue', className: 'bg-blue-500 hover:bg-blue-600 text-white', onClick: (p) => handleStatusUpdate(p, 'Acknowledged') },
+    { label: 'Mark Resolved', className: 'bg-emerald-500 hover:bg-emerald-600 text-white', onClick: (p) => handleStatusUpdate(p, 'Resolved') }
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-2xl font-bold text-slate-800">Approve Problems</h3>
-          <p className="text-slate-500 mt-1">Review, acknowledge, and resolve reported field issues.</p>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h3 className="text-2xl font-bold text-slate-800">Equipment Issues</h3>
+        <p className="text-slate-500 mt-1">System-wide equipment non-functionality overview (read-only)</p>
+      </div>
+
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+          <div className="flex flex-col justify-between">
+            <h2 className="text-3xl font-bold text-slate-800 mt-1">{stats.total}</h2>
+            <p className="text-slate-500 font-medium text-sm mt-2">Total Problems Reported</p>
+          </div>
         </div>
-        <div className="bg-orange-50 border border-orange-100 text-orange-700 px-4 py-2 rounded-lg flex items-center gap-2 font-medium">
-          <MessageSquareWarning className="w-5 h-5 text-orange-500" />
-          {pendingCount} Pending Issues
+        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+          <div className="flex flex-col justify-between">
+            <h2 className="text-3xl font-bold text-red-600 mt-1">{stats.open}</h2>
+            <p className="text-slate-500 font-medium text-sm mt-2">Open Issues</p>
+          </div>
+        </div>
+        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+          <div className="flex flex-col justify-between">
+            <h2 className="text-3xl font-bold text-amber-500 mt-1">{stats.repair}</h2>
+             <p className="text-slate-500 font-medium text-sm mt-2">Under Repair</p>
+          </div>
+        </div>
+        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+          <div className="flex flex-col justify-between">
+             <h2 className="text-3xl font-bold text-emerald-600 mt-1">{stats.resolved}</h2>
+             <p className="text-slate-500 font-medium text-sm mt-2">Resolved</p>
+          </div>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <div className="relative">
-             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-             <input
-                type="text"
-                placeholder="Search problems..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all text-slate-700"
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+           <div className="relative flex-1 max-w-xl">
+             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+             <input 
+               type="text" 
+               placeholder="Search by equipment, beneficiary..."
+               className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
              />
-          </div>
+           </div>
+           <div className="flex gap-3">
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={zoneFilter}
+               onChange={(e) => setZoneFilter(e.target.value)}
+             >
+                <option value="All Zones">All Zones</option>
+                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
+             </select>
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={statusFilter}
+               onChange={(e) => setStatusFilter(e.target.value)}
+             >
+                <option value="All Status">All Status</option>
+                {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+             </select>
+           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 text-slate-500 text-sm border-b border-slate-100">
-                <th className="p-4 font-medium">Issue Title</th>
-                <th className="p-4 font-medium">Category</th>
-                <th className="p-4 font-medium">Kebele</th>
-                <th className="p-4 font-medium">Date Reported</th>
-                <th className="p-4 font-medium">Urgency</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((problem) => (
-                <tr key={problem.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="p-4 font-medium text-slate-800">{problem.title}</td>
-                  <td className="p-4 text-slate-600">{problem.category}</td>
-                  <td className="p-4 text-slate-600">{problem.kebele}</td>
-                  <td className="p-4 text-slate-500 text-sm">{problem.created_at?.split('T')[0] || '-'}</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${
-                      problem.urgency === 'High' ? 'text-red-700 bg-red-50' :
-                      problem.urgency === 'Medium' ? 'text-orange-700 bg-orange-50' :
-                      'text-blue-700 bg-blue-50'
-                    }`}>
-                      {problem.urgency}
-                    </span>
+          <table className="w-full text-left text-sm">
+            <tbody className="divide-y divide-slate-50">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-8 text-center text-slate-500">
+                    No problem reports found.
                   </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                      problem.status === 'Resolved' ? 'bg-green-50 text-green-700 border-green-200' :
-                      problem.status === 'Acknowledged' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                      'bg-orange-50 text-orange-700 border-orange-200'
-                    }`}>
-                      {problem.status}
-                    </span>
+                </tr>
+              ) : filtered.map((p) => (
+                <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="p-4 pl-6 flex items-center gap-3">
+                    <div className="p-2 bg-red-50 text-red-500 rounded-full">
+                       <AlertOctagon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-800">{p.beneficiary_name}</div>
+                      <div className="text-xs text-slate-400">{p.equipment} - {p.zone}</div>
+                    </div>
                   </td>
-                  <td className="p-4 flex items-center justify-end gap-2">
-                    {problem.status === 'Pending' && (
-                      <button onClick={() => handleAcknowledge(problem.id)} className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200">
-                        Acknowledge
-                      </button>
-                    )}
-                    {problem.status !== 'Resolved' && (
-                      <button onClick={() => handleResolve(problem.id)} className="p-1.5 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border border-green-200" title="Mark as Resolved">
-                        <CheckCircle className="w-4 h-4" />
-                      </button>
-                    )}
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                       <span className="font-bold text-red-500 text-xs">{p.issue_type || 'Not Functional'}</span>
+                       <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(p.status)}`}>
+                          {p.status}
+                       </span>
+                       <button onClick={() => setActiveProblem(p)} className="ml-2 p-2 text-slate-400 hover:text-blue-500 rounded-lg transition-colors" title="View Details Log">
+                          <Eye className="w-5 h-5" />
+                       </button>
+                    </div>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan="7" className="p-8 text-center text-slate-500">
-                    No problems found matching your search.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {activeProblem && (
+        <ProblemDetailsModal 
+          problem={activeProblem} 
+          onClose={() => setActiveProblem(null)} 
+          actionConfig={actionConfig} 
+        />
+      )}
     </div>
   );
 };

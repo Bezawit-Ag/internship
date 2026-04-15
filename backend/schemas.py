@@ -67,6 +67,35 @@ class AgentResponse(AgentCreate):
     class Config:
         from_attributes = True
 
+class BeneficiaryCreate(BaseModel):
+    full_name: str
+    national_id: Optional[str] = None
+    phone: Optional[str] = None
+    gender: Optional[str] = None
+    household_size: Optional[str] = None
+    zone: str
+    woreda: str
+    kebele: str
+    village: Optional[str] = None
+    survey_type: str
+    equipment_type: str
+    supplier: Optional[str] = None
+    details_json: Optional[str] = None
+    status: Optional[str] = 'Pending Woreda'
+
+class ProblemCreate(BaseModel):
+    equipment: str
+    title: str
+    category: str
+    zone: str
+    woreda: str
+    kebele: str
+    urgency: str
+    beneficiary_name: str
+    submitted_by: str
+    status: Optional[str] = 'Open'
+    details_json: Optional[str] = None
+
 class BeneficiaryStatusUpdate(BaseModel):
     status: str
 

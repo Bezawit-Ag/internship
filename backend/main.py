@@ -332,6 +332,23 @@ def get_beneficiaries(status: str = None):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/beneficiaries")
+def create_beneficiary(b: schemas.BeneficiaryCreate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO beneficiaries 
+            (full_name, national_id, phone, gender, household_size, zone, woreda, kebele, village, survey_type, equipment_type, supplier, details_json, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (b.full_name, b.national_id, b.phone, b.gender, b.household_size, b.zone, b.woreda, b.kebele, b.village, b.survey_type, b.equipment_type, b.supplier, b.details_json, b.status))
+        conn.commit()
+        last_id = c.lastrowid
+        conn.close()
+        return {"message": "Beneficiary generated successfully", "id": last_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.put("/api/beneficiaries/{id}/status")
 def update_beneficiary_status(id: int, status_update: schemas.BeneficiaryStatusUpdate):
     try:
@@ -362,6 +379,23 @@ def get_problems(status: str = None):
             p["details"] = {"serialNumber": p["serial_number"]}    
         conn.close()
         return problems_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/problems")
+def create_problem(p: schemas.ProblemCreate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO problems
+            (equipment, title, category, zone, woreda, kebele, urgency, beneficiary_name, submitted_by, details_json, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (p.equipment, p.title, p.category, p.zone, p.woreda, p.kebele, p.urgency, p.beneficiary_name, p.submitted_by, p.details_json, p.status))
+        conn.commit()
+        last_id = c.lastrowid
+        conn.close()
+        return {"message": "Problem logged successfully", "id": last_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

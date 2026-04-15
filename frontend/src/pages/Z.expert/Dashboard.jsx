@@ -10,7 +10,7 @@ const Dashboard = () => {
     <div className="flex bg-slate-50 min-h-screen font-sans">
       <Sidebar activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
 
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 ml-64 flex flex-col min-h-screen">
         <Header activeMenu={activeMenu} />
 
         <main className="flex-1 p-8 overflow-y-auto w-full">

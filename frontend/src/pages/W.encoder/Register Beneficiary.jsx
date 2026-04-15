@@ -182,6 +182,40 @@ const RegisterBeneficiary = () => {
   };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
+  const submitForm = async () => {
+    try {
+      const payload = {
+        full_name: formData.fullName || formData.institutionName || formData.representativeName,
+        national_id: formData.nationalId || '-',
+        phone: formData.phoneNumber || formData.representativePhone || '-',
+        gender: formData.gender,
+        household_size: formData.householdSize,
+        zone: formData.zone,
+        woreda: formData.woreda,
+        kebele: formData.kebele,
+        village: formData.village,
+        survey_type: formData.surveyType,
+        equipment_type: formData.equipmentType,
+        supplier: formData.assignedSupplier,
+        status: 'Pending Woreda',
+        details_json: JSON.stringify(formData)
+      };
+
+      const res = await fetch('http://localhost:8000/api/beneficiaries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        alert("Beneficiary Successfully Registered!");
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error submitting form");
+    }
+  };
+
     const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -1075,7 +1109,7 @@ const RegisterBeneficiary = () => {
             </button>
           ) : (
             <button 
-              onClick={() => alert("Form Submitted!")}
+              onClick={submitForm}
               className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all"
             >
               <Send className="w-4 h-4" /> Submit Survey

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, AlertOctagon, Wrench, CheckCircle2, FileText, Eye } from 'lucide-react';
+import ProblemDetailsModal from '../../components/ProblemDetailsModal';
 
 const ProblemApproval = () => {
   const [problems, setProblems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [zoneFilter, setZoneFilter] = useState('All Zones');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [activeProblem, setActiveProblem] = useState(null);
 
   useEffect(() => {
     fetchProblems();
@@ -21,10 +25,33 @@ const ProblemApproval = () => {
     }
   };
 
-  const filtered = problems.filter(p => 
-    p.beneficiary_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.equipment?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleStatusUpdate = async (problem, newStatus) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/problems/${problem.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setActiveProblem(null);
+        fetchProblems();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const filtered = problems.filter(p => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch = p.beneficiary_name?.toLowerCase().includes(term) || 
+      p.equipment?.toLowerCase().includes(term);
+    const matchZone = zoneFilter === 'All Zones' ? true : p.zone === zoneFilter;
+    const matchStatus = statusFilter === 'All Status' ? true : p.status === statusFilter;
+    return matchSearch && matchZone && matchStatus;
+  });
+
+  const uniqueZones = [...new Set(problems.map(p => p.zone).filter(Boolean))];
+  const uniqueStatuses = [...new Set(problems.map(p => p.status).filter(Boolean))];
 
   const stats = {
     total: problems.length,
@@ -41,20 +68,11 @@ const ProblemApproval = () => {
     return 'text-slate-600 bg-slate-50 border-slate-200';
   };
 
-  const updateStatus = async (id, newStatus) => {
-    try {
-      const res = await fetch(`http://localhost:8000/api/problems/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (res.ok) {
-        fetchProblems();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const actionConfig = [
+    { label: 'Assign Repair', className: 'bg-amber-500 hover:bg-amber-600 text-white', onClick: (p) => handleStatusUpdate(p, 'Under Repair') },
+    { label: 'Mark Resolved', className: 'bg-emerald-500 hover:bg-emerald-600 text-white', onClick: (p) => handleStatusUpdate(p, 'Resolved') },
+    { label: 'Close Issue', className: 'bg-slate-500 hover:bg-slate-600 text-white', onClick: (p) => handleStatusUpdate(p, 'Closed') }
+  ];
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
@@ -111,17 +129,34 @@ const ProblemApproval = () => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100">
-           <h3 className="text-lg font-bold text-slate-800 mb-4">Recent Problem Reports</h3>
-           <div className="relative max-w-md">
-             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+           <div className="relative flex-1 max-w-xl">
+             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
              <input 
                type="text" 
-               placeholder="Search by equipment or beneficiary..."
-               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm"
+               placeholder="Search by equipment, beneficiary..."
+               className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
              />
+           </div>
+           <div className="flex gap-3">
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={zoneFilter}
+               onChange={(e) => setZoneFilter(e.target.value)}
+             >
+                <option value="All Zones">All Zones</option>
+                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
+             </select>
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={statusFilter}
+               onChange={(e) => setStatusFilter(e.target.value)}
+             >
+                <option value="All Status">All Status</option>
+                {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+             </select>
            </div>
         </div>
 
@@ -129,12 +164,12 @@ const ProblemApproval = () => {
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-500 font-semibold text-xs tracking-wider">
                <tr>
-                 <th className="p-4">EQUIPMENT / S.NO</th>
-                 <th className="p-4">BENEFICIARY</th>
-                 <th className="p-4">LOCATION</th>
-                 <th className="p-4">REPORTED</th>
-                 <th className="p-4">STATUS</th>
-                 <th className="p-4 text-center">ACTION</th>
+                 <th className="p-4 border-b border-slate-100">EQUIPMENT / S.NO</th>
+                 <th className="p-4 border-b border-slate-100">BENEFICIARY</th>
+                 <th className="p-4 border-b border-slate-100">LOCATION</th>
+                 <th className="p-4 border-b border-slate-100">REPORTED</th>
+                 <th className="p-4 border-b border-slate-100">STATUS</th>
+                 <th className="p-4 border-b border-slate-100 text-center">ACTION</th>
                </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -146,9 +181,12 @@ const ProblemApproval = () => {
                 </tr>
               ) : filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4">
-                    <div className="font-bold text-slate-800">{p.equipment}</div>
-                    <div className="text-xs text-slate-400">{p.details?.serialNumber || 'N/A'}</div>
+                  <td className="p-4 flex items-center gap-2">
+                    <AlertOctagon className="w-4 h-4 text-red-400" />
+                    <div>
+                      <div className="font-bold text-slate-800">{p.equipment}</div>
+                      <div className="text-xs text-slate-400">{p.details?.serialNumber || 'N/A'}</div>
+                    </div>
                   </td>
                   <td className="p-4 text-slate-600 font-medium">{p.beneficiary_name}</td>
                   <td className="p-4">
@@ -162,17 +200,9 @@ const ProblemApproval = () => {
                      </span>
                   </td>
                   <td className="p-4 text-center">
-                     <select 
-                       className="text-xs px-2 py-1 bg-slate-50 border border-slate-200 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                       value={p.status}
-                       onChange={(e) => updateStatus(p.id, e.target.value)}
-                     >
-                       <option value="Open">Open</option>
-                       <option value="Pending">Pending</option>
-                       <option value="Acknowledged">Acknowledged</option>
-                       <option value="Under Repair">Under Repair</option>
-                       <option value="Resolved">Resolved</option>
-                     </select>
+                     <button onClick={() => setActiveProblem(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors inline-block" title="View Details">
+                        <Eye className="w-5 h-5" />
+                     </button>
                   </td>
                 </tr>
               ))}
@@ -180,6 +210,14 @@ const ProblemApproval = () => {
           </table>
         </div>
       </div>
+
+      {activeProblem && (
+        <ProblemDetailsModal 
+          problem={activeProblem} 
+          onClose={() => setActiveProblem(null)} 
+          actionConfig={actionConfig} 
+        />
+      )}
     </div>
   );
 };

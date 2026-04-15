@@ -1,4 +1,5 @@
 import { LayoutDashboard, Users, Map, HeartHandshake, FileText, UserCog, History, Settings, LogOut, ChevronLeft } from "lucide-react";
+import logo from '../../../../assets/logo.png';
 
 export default function Sidebar({ activeMenu, setActiveMenu }) {
   const menuItems = [
@@ -16,10 +17,7 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
     <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center gap-3 font-bold text-lg text-primary">
-          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-            {/* Logo icon representation */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5v14M7 5v14M22 8v8M2 8v8" /></svg>
-          </div>
+          <img src={logo} alt="SEDMS Logo" className="w-10 h-10 object-contain" />
           <div className="leading-tight">
             <span className="block text-slate-800">SEDMS</span>
             <span className="text-[9px] uppercase tracking-wider text-slate-400">Amhara Water & Energy</span>

@@ -1,192 +1,176 @@
-import React, { useState } from 'react';
-import { Check, X, Search, Clock, FileWarning } from 'lucide-react';
-
-const initialBeneficiaries = [
-  { id: 1, name: "Abebe Kebede", kebele: "01", resourceRequested: "Home Solar System", submittedBy: "Encoder_01", status: "Pending", date: "2023-11-01" },
-  { id: 2, name: "Fatima Hussein", kebele: "04", resourceRequested: "Solar Lantern", submittedBy: "Encoder_02", status: "Pending", date: "2023-11-02" },
-  { id: 3, name: "Dawit Tadesse", kebele: "02", resourceRequested: "Off-grid System", submittedBy: "Encoder_01", status: "Pending", date: "2023-11-03" },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, Eye, Filter } from 'lucide-react';
+import BeneficiaryDetailsModal from '../../components/BeneficiaryDetailsModal';
 
 const ApproveBeneficiary = () => {
   const [beneficiaries, setBeneficiaries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [adjustmentModal, setAdjustmentModal] = useState({ isOpen: false, id: null, comment: '' });
+  const [zoneFilter, setZoneFilter] = useState('All Zones');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [activeBeneficiary, setActiveBeneficiary] = useState(null);
 
   useEffect(() => {
-    fetchQueue();
+    fetchBeneficiaries();
   }, []);
 
-  const fetchQueue = async () => {
+  const fetchBeneficiaries = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/beneficiaries?status=Pending Woreda');
+      const res = await fetch(`http://localhost:8000/api/beneficiaries?status=Pending Woreda`);
       if (res.ok) {
         const data = await res.json();
         setBeneficiaries(data);
       }
     } catch (e) {
-      console.error("Error fetching beneficiaries:", e);
+      console.error(e);
     }
   };
 
-  const handleApprove = async (id) => {
+  const handleStatusUpdate = async (beneficiary, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/beneficiaries/${id}/status`, {
+      const res = await fetch(`http://localhost:8000/api/beneficiaries/${beneficiary.id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Pending Zone' })
+        body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
-        alert("Forwarded to Zone Approver!");
-        fetchQueue();
+        setActiveBeneficiary(null);
+        fetchBeneficiaries();
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handleOpenAdjustment = (id) => {
-    setAdjustmentModal({ isOpen: true, id: id, comment: '' });
+  const filtered = beneficiaries.filter(b => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch = b.full_name?.toLowerCase().includes(term) || b.national_id?.toLowerCase().includes(term) || b.woreda?.toLowerCase().includes(term);
+    const matchZone = zoneFilter === 'All Zones' ? true : b.zone === zoneFilter;
+    const matchStatus = statusFilter === 'All Status' ? true : b.status === statusFilter;
+    return matchSearch && matchZone && matchStatus;
+  });
+
+  const uniqueZones = [...new Set(beneficiaries.map(b => b.zone).filter(Boolean))];
+  const uniqueStatuses = [...new Set(beneficiaries.map(b => b.status).filter(Boolean))];
+
+  const getStatusColor = (status) => {
+    if (status === 'Approved') return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+    if (status === 'Pending Woreda' || status === 'Pending Zone') return 'text-orange-700 bg-orange-50 border-orange-200';
+    if (status === 'Rejected') return 'text-red-700 bg-red-50 border-red-200';
+    return 'text-slate-600 bg-slate-50 border-slate-200';
   };
 
-  const handleCloseAdjustment = () => {
-    setAdjustmentModal({ isOpen: false, id: null, comment: '' });
-  };
-
-  const handleSubmitAdjustment = async () => {
-    if (!adjustmentModal.comment.trim()) return;
-    
-    try {
-      const res = await fetch(`http://localhost:8000/api/beneficiaries/${adjustmentModal.id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Adjustment Needed' }) // In reality, we'd also send the comment
-      });
-      if (res.ok) {
-        handleCloseAdjustment();
-        fetchQueue();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const filtered = beneficiaries.filter(b => b.full_name?.toLowerCase().includes(searchTerm.toLowerCase()));
-  const pendingCount = beneficiaries.length;
+  const actionConfig = [
+    { label: 'Approve Submission', className: 'bg-emerald-500 hover:bg-emerald-600 text-white', onClick: (b) => handleStatusUpdate(b, 'Pending Zone') },
+    { label: 'Return for Correction', className: 'bg-amber-500 hover:bg-amber-600 text-white', onClick: (b) => handleStatusUpdate(b, 'Adjustment Needed') },
+    { label: 'Reject Submission', className: 'bg-red-500 hover:bg-red-600 text-white', onClick: (b) => handleStatusUpdate(b, 'Rejected') }
+  ];
 
   return (
-    <>
-      <div className="max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-2xl font-bold text-slate-800">Approve Beneficiaries</h3>
-            <p className="text-slate-500 mt-1">Review and approve daily beneficiary registrations.</p>
-          </div>
-          <div className="bg-amber-50 border border-amber-100 text-amber-700 px-4 py-2 rounded-lg flex items-center gap-2 font-medium">
-            <Clock className="w-5 h-5 text-amber-500" />
-            {pendingCount} Pending Approvals
-          </div>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h3 className="text-2xl font-bold text-slate-800">Beneficiaries</h3>
+        <p className="text-slate-500 mt-1">{beneficiaries.length} records • Solar equipment recipients</p>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+           <div className="relative flex-1 max-w-xl">
+             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+             <input 
+               type="text" 
+               placeholder="Search name, ID, woreda..."
+               className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+             />
+           </div>
+           <div className="flex gap-3">
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={zoneFilter}
+               onChange={(e) => setZoneFilter(e.target.value)}
+             >
+                <option value="All Zones">All Zones</option>
+                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
+             </select>
+             <select 
+               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
+               value={statusFilter}
+               onChange={(e) => setStatusFilter(e.target.value)}
+             >
+                <option value="All Status">All Status</option>
+                {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+             </select>
+           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <div className="relative">
-               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-               <input
-                  type="text"
-                  placeholder="Search beneficiaries..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all text-slate-700"
-               />
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 text-slate-500 text-sm border-b border-slate-100">
-                  <th className="p-4 font-medium">Beneficiary Name</th>
-                  <th className="p-4 font-medium">Kebele</th>
-                  <th className="p-4 font-medium">Equipment Type</th>
-                  <th className="p-4 font-medium">Submitted By</th>
-                  <th className="p-4 font-medium">Submission Date</th>
-                  <th className="p-4 font-medium text-right">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold text-xs tracking-wider">
+               <tr>
+                 <th className="p-4 pl-6 uppercase">Beneficiary</th>
+                 <th className="p-4 uppercase">Location</th>
+                 <th className="p-4 uppercase">Equipment</th>
+                 <th className="p-4 uppercase">Supplier</th>
+                 <th className="p-4 uppercase">Status</th>
+                 <th className="p-4 uppercase">Date</th>
+                 <th className="p-4 text-center"></th>
+               </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filtered.length === 0 ? (
+                <tr><td colSpan="7" className="p-8 text-center text-slate-500">No beneficiaries found in Woreda queue.</td></tr>
+              ) : filtered.map((b) => (
+                <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="p-4 pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
+                        {b.full_name?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-800">{b.full_name}</div>
+                        <div className="text-xs text-slate-400">{b.national_id || 'No ID'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="text-slate-800 font-medium">{b.kebele || b.woreda}</div>
+                    <div className="text-xs text-slate-400">{b.zone}</div>
+                  </td>
+                  <td className="p-4">
+                     <span className="font-bold text-blue-700 text-xs px-2 py-0.5">{b.equipment_type || 'Unknown'}</span>
+                  </td>
+                  <td className="p-4 text-slate-600 max-w-[150px] truncate">{b.supplier || 'Unassigned'}</td>
+                  <td className="p-4">
+                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusColor(b.status)}`}>
+                        {b.status === 'Pending Woreda' ? 'Pending' : b.status}
+                     </span>
+                  </td>
+                  <td className="p-4 text-slate-500">{new Date(b.created_at).toISOString().split('T')[0]}</td>
+                  <td className="p-4 text-center">
+                     <button onClick={() => setActiveBeneficiary(b)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors inline-block" title="View Details Log">
+                        <Eye className="w-5 h-5" />
+                     </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filtered.map((beneficiary) => (
-                  <tr key={beneficiary.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="p-4">
-                      <div className="font-bold text-slate-800">{beneficiary.full_name}</div>
-                      <div className="text-xs text-slate-400 font-mono">{beneficiary.national_id || 'No ID'}</div>
-                    </td>
-                    <td className="p-4 text-slate-600">{beneficiary.kebele}</td>
-                    <td className="p-4 text-slate-600">{beneficiary.equipment_type}</td>
-                    <td className="p-4 text-slate-600">Woreda Encoder</td>
-                    <td className="p-4 text-slate-500 text-sm">{beneficiary.created_at?.split('T')[0] || (typeof beneficiary.created_at === 'string' ? beneficiary.created_at.split(' ')[0] : '-')}</td>
-                    <td className="p-4 flex items-center justify-end gap-2">
-                      <button onClick={() => handleApprove(beneficiary.id)} className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors" title="Approve">
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleOpenAdjustment(beneficiary.id)} className="p-2 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors" title="Request Adjustment">
-                        <FileWarning className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="p-8 text-center text-slate-500">
-                      No beneficiaries found matching your search.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+           <span>Page 1 of 1</span>
         </div>
       </div>
 
-      {adjustmentModal.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center gap-3 text-orange-600">
-              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                <FileWarning className="w-5 h-5" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">Request Adjustment</h3>
-            </div>
-            <div className="p-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Reason for adjustment / Comments
-              </label>
-              <textarea
-                autoFocus
-                value={adjustmentModal.comment}
-                onChange={(e) => setAdjustmentModal({ ...adjustmentModal, comment: e.target.value })}
-                placeholder="E.g., Missing Kebele ID attachment, wrong resource requested..."
-                className="w-full h-32 p-3 bg-slate-50 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-slate-700"
-              />
-            </div>
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button 
-                onClick={handleCloseAdjustment}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleSubmitAdjustment}
-                disabled={!adjustmentModal.comment.trim()}
-                className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Submit Request
-              </button>
-            </div>
-          </div>
-        </div>
+      {activeBeneficiary && (
+        <BeneficiaryDetailsModal 
+          beneficiary={activeBeneficiary} 
+          onClose={() => setActiveBeneficiary(null)} 
+          actionConfig={actionConfig} 
+        />
       )}
-    </>
+    </div>
   );
 };
 
