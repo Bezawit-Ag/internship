@@ -49,6 +49,31 @@ class AreaAssignmentCreate(BaseModel):
     woreda_id: int
     kebele: str
 
+class AgentCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+    national_id: str
+    zone_id: int
+
+class AgentResponse(AgentCreate):
+    id: int
+    status: str
+    performance: int
+    served: int
+    zone_name: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class BeneficiaryStatusUpdate(BaseModel):
+    status: str
+
+class ProblemStatusUpdate(BaseModel):
+    status: str
+
+
 class DashboardStatsResponse(BaseModel):
     total_suppliers: int
     suppliers_trend: float

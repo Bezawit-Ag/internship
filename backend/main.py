@@ -271,7 +271,113 @@ def get_area_assignments():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# 6️⃣ Run backend
+# 6️⃣ Agents routes
+@app.get("/api/agents", response_model=list[schemas.AgentResponse])
+def get_agents():
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        c.execute('''
+            SELECT a.*, z.name as zone_name
+            FROM agents a
+            LEFT JOIN zones z ON a.zone_id = z.id
+            ORDER BY a.created_at DESC
+        ''')
+        agents_data = list(c.fetchall())
+        conn.close()
+        return agents_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/agents", response_model=schemas.AgentResponse)
+def create_agent(agent: schemas.AgentCreate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO agents (name, email, phone, national_id, zone_id)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (agent.name, agent.email, agent.phone, agent.national_id, agent.zone_id))
+        conn.commit()
+        last_id = c.lastrowid
+        conn.close()
+        
+        import datetime
+        return {
+            "id": last_id,
+            "status": "Active",
+            "performance": 0,
+            "served": 0,
+            "created_at": datetime.datetime.utcnow(),
+            **agent.dict()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 7️⃣ Beneficiaries routes
+@app.get("/api/beneficiaries")
+def get_beneficiaries(status: str = None):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        
+        if status:
+            c.execute("SELECT * FROM beneficiaries WHERE status = %s ORDER BY created_at DESC", (status,))
+        else:
+            c.execute("SELECT * FROM beneficiaries ORDER BY created_at DESC")
+            
+        beneficiaries_data = list(c.fetchall())
+        conn.close()
+        return beneficiaries_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/beneficiaries/{id}/status")
+def update_beneficiary_status(id: int, status_update: schemas.BeneficiaryStatusUpdate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("UPDATE beneficiaries SET status = %s WHERE id = %s", (status_update.status, id))
+        conn.commit()
+        conn.close()
+        return {"message": "Status updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 8️⃣ Problems routes
+@app.get("/api/problems")
+def get_problems(status: str = None):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        
+        if status:
+            c.execute("SELECT * FROM problems WHERE status = %s ORDER BY created_at DESC", (status,))
+        else:
+            c.execute("SELECT * FROM problems ORDER BY created_at DESC")
+            
+        problems_data = list(c.fetchall())
+        for p in problems_data:
+            # Map for frontend expectations
+            p["details"] = {"serialNumber": p["serial_number"]}    
+        conn.close()
+        return problems_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/problems/{id}/status")
+def update_problem_status(id: int, status_update: schemas.ProblemStatusUpdate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("UPDATE problems SET status = %s WHERE id = %s", (status_update.status, id))
+        conn.commit()
+        conn.close()
+        return {"message": "Problem status updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 9️⃣ Run backend
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -8,12 +8,40 @@ const initialBeneficiaries = [
 ];
 
 const ApproveBeneficiary = () => {
-  const [beneficiaries, setBeneficiaries] = useState(initialBeneficiaries);
+  const [beneficiaries, setBeneficiaries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [adjustmentModal, setAdjustmentModal] = useState({ isOpen: false, id: null, comment: '' });
 
-  const handleApprove = (id) => {
-    setBeneficiaries(beneficiaries.map(b => b.id === id ? { ...b, status: 'Approved' } : b));
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/beneficiaries?status=Pending Woreda');
+      if (res.ok) {
+        const data = await res.json();
+        setBeneficiaries(data);
+      }
+    } catch (e) {
+      console.error("Error fetching beneficiaries:", e);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/beneficiaries/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Pending Zone' })
+      });
+      if (res.ok) {
+        alert("Forwarded to Zone Approver!");
+        fetchQueue();
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleOpenAdjustment = (id) => {
@@ -24,22 +52,31 @@ const ApproveBeneficiary = () => {
     setAdjustmentModal({ isOpen: false, id: null, comment: '' });
   };
 
-  const handleSubmitAdjustment = () => {
+  const handleSubmitAdjustment = async () => {
     if (!adjustmentModal.comment.trim()) return;
     
-    setBeneficiaries(beneficiaries.map(b => 
-      b.id === adjustmentModal.id ? { ...b, status: 'Adjustment Needed', comment: adjustmentModal.comment } : b
-    ));
-    handleCloseAdjustment();
+    try {
+      const res = await fetch(`http://localhost:8000/api/beneficiaries/${adjustmentModal.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Adjustment Needed' }) // In reality, we'd also send the comment
+      });
+      if (res.ok) {
+        handleCloseAdjustment();
+        fetchQueue();
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const filtered = beneficiaries.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const pendingCount = beneficiaries.filter(b => b.status === 'Pending').length;
+  const filtered = beneficiaries.filter(b => b.full_name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const pendingCount = beneficiaries.length;
 
   return (
     <>
-      <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-bold text-slate-800">Approve Beneficiaries</h3>
             <p className="text-slate-500 mt-1">Review and approve daily beneficiary registrations.</p>
@@ -70,41 +107,30 @@ const ApproveBeneficiary = () => {
                 <tr className="bg-slate-50/50 text-slate-500 text-sm border-b border-slate-100">
                   <th className="p-4 font-medium">Beneficiary Name</th>
                   <th className="p-4 font-medium">Kebele</th>
-                  <th className="p-4 font-medium">Resource Requested</th>
+                  <th className="p-4 font-medium">Equipment Type</th>
                   <th className="p-4 font-medium">Submitted By</th>
                   <th className="p-4 font-medium">Submission Date</th>
-                  <th className="p-4 font-medium">Status</th>
                   <th className="p-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((beneficiary) => (
                   <tr key={beneficiary.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="p-4 font-medium text-slate-800">{beneficiary.name}</td>
-                    <td className="p-4 text-slate-600">{beneficiary.kebele}</td>
-                    <td className="p-4 text-slate-600">{beneficiary.resourceRequested}</td>
-                    <td className="p-4 text-slate-600">{beneficiary.submittedBy}</td>
-                    <td className="p-4 text-slate-500 text-sm">{beneficiary.date}</td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        beneficiary.status === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' :
-                        beneficiary.status === 'Adjustment Needed' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                        'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}>
-                        {beneficiary.status}
-                      </span>
+                      <div className="font-bold text-slate-800">{beneficiary.full_name}</div>
+                      <div className="text-xs text-slate-400 font-mono">{beneficiary.national_id || 'No ID'}</div>
                     </td>
+                    <td className="p-4 text-slate-600">{beneficiary.kebele}</td>
+                    <td className="p-4 text-slate-600">{beneficiary.equipment_type}</td>
+                    <td className="p-4 text-slate-600">Woreda Encoder</td>
+                    <td className="p-4 text-slate-500 text-sm">{beneficiary.created_at?.split('T')[0] || (typeof beneficiary.created_at === 'string' ? beneficiary.created_at.split(' ')[0] : '-')}</td>
                     <td className="p-4 flex items-center justify-end gap-2">
-                      {beneficiary.status === 'Pending' && (
-                        <>
-                          <button onClick={() => handleApprove(beneficiary.id)} className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors" title="Approve">
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleOpenAdjustment(beneficiary.id)} className="p-2 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors" title="Request Adjustment">
-                            <FileWarning className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
+                      <button onClick={() => handleApprove(beneficiary.id)} className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors" title="Approve">
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleOpenAdjustment(beneficiary.id)} className="p-2 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors" title="Request Adjustment">
+                        <FileWarning className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}

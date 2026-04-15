@@ -8,18 +8,44 @@ const initialProblems = [
 ];
 
 const ApproveProblem = () => {
-  const [problems, setProblems] = useState(initialProblems);
+  const [problems, setProblems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleAcknowledge = (id) => {
-    setProblems(problems.map(p => p.id === id ? { ...p, status: 'Acknowledged' } : p));
+  useEffect(() => {
+    fetchProblems();
+  }, []);
+
+  const fetchProblems = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/problems');
+      if (res.ok) {
+        const data = await res.json();
+        setProblems(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleResolve = (id) => {
-    setProblems(problems.map(p => p.id === id ? { ...p, status: 'Resolved' } : p));
+  const updateStatus = async (id, status) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/problems/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetchProblems();
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const filtered = problems.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const handleAcknowledge = (id) => updateStatus(id, 'Acknowledged');
+  const handleResolve = (id) => updateStatus(id, 'Resolved');
+
+  const filtered = problems.filter(p => p.title?.toLowerCase().includes(searchTerm.toLowerCase()));
   const pendingCount = problems.filter(p => p.status === 'Pending').length;
 
   return (
@@ -68,7 +94,7 @@ const ApproveProblem = () => {
                   <td className="p-4 font-medium text-slate-800">{problem.title}</td>
                   <td className="p-4 text-slate-600">{problem.category}</td>
                   <td className="p-4 text-slate-600">{problem.kebele}</td>
-                  <td className="p-4 text-slate-500 text-sm">{problem.date}</td>
+                  <td className="p-4 text-slate-500 text-sm">{problem.created_at?.split('T')[0] || '-'}</td>
                   <td className="p-4">
                     <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${
                       problem.urgency === 'High' ? 'text-red-700 bg-red-50' :

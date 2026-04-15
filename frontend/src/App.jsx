@@ -9,7 +9,7 @@ import AreaAssignment from './pages/super-admin/Area assignment/AreaAssignment';
 import SupplierManagement from './pages/super-admin/Supplier management';
 import WoredaEncoderDashboard from './pages/W.encoder/Dashboard';
 import WoredaApproverDashboard from './pages/W.approver/Dashboard';
-import ZoneEncoderDashboard from './pages/Z.encoder/Dashboard';
+import ZoneExpertDashboard from './pages/Z.expert/Dashboard';
 import ZoneApproverDashboard from './pages/Z.approver/Dashboard';
 
 function SuperAdminApp() {
@@ -86,7 +86,7 @@ function App() {
       <Routes>
         <Route path="/wencoder/*" element={<WoredaEncoderDashboard />} />
         <Route path="/wapprover/*" element={<WoredaApproverDashboard />} />
-        <Route path="/zoneE/*" element={<ZoneEncoderDashboard />} />
+        <Route path="/zoneE/*" element={<ZoneExpertDashboard />} />
         <Route path="/zoneA/*" element={<ZoneApproverDashboard />} />
         {/* Default route for now maps to Super Admin Dashboard until authentication is ready */}
         <Route path="/*" element={<SuperAdminApp />} />

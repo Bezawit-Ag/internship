@@ -39,12 +39,17 @@ def init_db():
 
     conn = get_db_connection()
     c = conn.cursor()
+    c.execute("SET FOREIGN_KEY_CHECKS = 0;")
     c.execute("DROP TABLE IF EXISTS area_assignments;")
     c.execute("DROP TABLE IF EXISTS woredas;")
     c.execute("DROP TABLE IF EXISTS zones;")
     c.execute("DROP TABLE IF EXISTS suppliers;")
+    c.execute("DROP TABLE IF EXISTS agents;")
+    c.execute("DROP TABLE IF EXISTS beneficiaries;")
+    c.execute("DROP TABLE IF EXISTS problems;")
     c.execute("DROP TABLE IF EXISTS activity_logs;")
     c.execute("DROP TABLE IF EXISTS dashboard_stats;")
+    c.execute("SET FOREIGN_KEY_CHECKS = 1;")
     
     c.execute('''
         CREATE TABLE dashboard_stats (
@@ -117,6 +122,61 @@ def init_db():
             FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
             FOREIGN KEY (zone_id) REFERENCES zones(id),
             FOREIGN KEY (woreda_id) REFERENCES woredas(id)
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE agents (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255),
+            phone VARCHAR(50),
+            national_id VARCHAR(100),
+            zone_id INTEGER,
+            status VARCHAR(50) DEFAULT 'Active',
+            performance INTEGER DEFAULT 0,
+            served INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (zone_id) REFERENCES zones(id)
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE beneficiaries (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            full_name VARCHAR(255) NOT NULL,
+            national_id VARCHAR(100),
+            phone VARCHAR(50),
+            gender VARCHAR(20),
+            household_size VARCHAR(50),
+            zone VARCHAR(255),
+            woreda VARCHAR(255),
+            kebele VARCHAR(255),
+            village VARCHAR(255),
+            survey_type VARCHAR(100),
+            equipment_type VARCHAR(100),
+            supplier VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'Pending Woreda',
+            details_json TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE problems (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            title VARCHAR(255),
+            category VARCHAR(100),
+            kebele VARCHAR(255),
+            woreda VARCHAR(255),
+            zone VARCHAR(255),
+            equipment VARCHAR(255),
+            serial_number VARCHAR(100),
+            beneficiary_name VARCHAR(255),
+            submitted_by VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'Pending',
+            urgency VARCHAR(50),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     ''')
     conn.commit()

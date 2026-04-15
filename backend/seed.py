@@ -52,6 +52,51 @@ def seed_data():
         VALUES (%s, %s, %s, %s, %s)
     ''', activities)
     
+    # --------------------------------
+    # Seed Agents
+    # --------------------------------
+    agents = [
+        ("Fekadu Assefa", "fekadu@sedms.et", "+251 921 001 001", "AG-001", 1, "Active", 88, 124),
+        ("Rahel Solomon", "rahel@sedms.et", "+251 922 002 002", "AG-002", 1, "Active", 76, 89),
+        ("Tadesse Girma", "tadesse@sedms.et", "+251 923 003 003", "AG-003", 4, "Active", 91, 156),
+        ("Meseret Alemu", "meseret@sedms.et", "+251 924 004 004", "AG-004", 2, "Inactive", 54, 42),
+        ("Solomon Bekele", "solomon@sedms.et", "+251 925 005 005", "AG-005", 3, "Active", 85, 108)
+    ]
+    c.executemany('''
+        INSERT INTO agents (name, email, phone, national_id, zone_id, status, performance, served)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    ''', agents)
+
+    # --------------------------------
+    # Seed Beneficiaries
+    # --------------------------------
+    beneficiaries = [
+        ("Abebe Bikila", "ET-BEN-001", "+251 920 111 001", "Male", "4-6", "North Gondar", "Dabat", "05", "Warka", "Home Solar System", "Home Solar System", "Solar Solutions Ethiopia PLC", "Approved", "{}", (now - datetime.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Almaz Tesfaye", "ET-BEN-002", "+251 920 111 002", "Female", "2-4", "North Gondar", "Debark", "02", "Tsehafi", "Home Solar System", "Solar Lantern", "EthioSun Light", "Pending Zone", "{}", (now - datetime.timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Tadesse Mengistu", "ET-BEN-003", "+251 920 111 003", "Male", "5+", "Awi", "Dangila", "01", "Addis Alem", "Home Solar System", "Home Solar System", "Sunrise Contractors", "Approved", "{}", (now - datetime.timedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Sara Worku", "ET-BEN-004", "+251 920 111 004", "Female", "1", "South Wollo", "Dessie Zuria", "03", "Kurkur", "Home Solar System", "Solar Lantern", "Amhara Solar Cooperative", "Rejected", "{}", (now - datetime.timedelta(days=4)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Fatima Hussein", "ET-BEN-005", "+251 920 111 005", "Female", "2-4", "East Gojam", "Debre Markos", "04", "Gudguad", "Home Solar System", "Home Solar System", "Green Energy Amhara", "Pending Woreda", "{}", (now - datetime.timedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')),
+    ]
+    c.executemany('''
+        INSERT INTO beneficiaries (full_name, national_id, phone, gender, household_size, zone, woreda, kebele, village, survey_type, equipment_type, supplier, status, details_json, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', beneficiaries)
+
+    # --------------------------------
+    # Seed Problems
+    # --------------------------------
+    problems = [
+        ("Delayed Solar Panel Delivery", "Logistics", "01", "Dabat", "North Gondar", "Home Solar System", "N/A", "Abebe Bikila", "Encoder_01", "Pending", "High", (now - datetime.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Faulty Battery Component", "Hardware", "03", "Kombolcha", "South Wollo", "Solar Lantern", "BAT-001", "Sara Worku", "Encoder_03", "Under Repair", "Medium", (now - datetime.timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Beneficiary Address Mismatch", "Data Issue", "02", "Debark", "North Gondar", "Home Solar System", "SYS-912", "Almaz Tesfaye", "Encoder_02", "Pending", "Low", (now - datetime.timedelta(days=2, hours=5)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Inverter Failure", "Hardware", "04", "Debre Markos", "East Gojam", "Institutional Solar", "INV-100", "Fatima Hussein", "Encoder_04", "Open", "High", (now - datetime.timedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')),
+        ("Cable Disconnected", "Hardware", "05", "Dangila", "Awi", "Home Solar System", "CBL-22", "Tadesse Mengistu", "Encoder_05", "Resolved", "Low", (now - datetime.timedelta(days=4)).strftime('%Y-%m-%d %H:%M:%S')),
+    ]
+    c.executemany('''
+        INSERT INTO problems (title, category, kebele, woreda, zone, equipment, serial_number, beneficiary_name, submitted_by, status, urgency, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', problems)
+
     conn.commit()
     conn.close()
     print("Database seeded successfully with initial dashboard data using MySQL.")
