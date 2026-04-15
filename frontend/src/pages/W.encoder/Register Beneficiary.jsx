@@ -31,6 +31,7 @@ const ZONE_WOREDAS = {
 
 const RegisterBeneficiary = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     surveyType: '',
     zone: '',
@@ -93,11 +94,97 @@ const RegisterBeneficiary = () => {
     projectCost: ''
   });
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 6));
+    const nextStep = () => {
+    const newErrors = {};
+    if (currentStep === 1) {
+      if (!formData.surveyType) newErrors.surveyType = "Required";
+      if (formData.surveyType === 'Off-Grid' && !formData.offGridType) newErrors.offGridType = "Required";
+    } else if (currentStep === 2) {
+      if (!formData.zone) newErrors.zone = "Required";
+      if (!formData.woreda) newErrors.woreda = "Required";
+      if (!formData.kebele) newErrors.kebele = "Required";
+      if (!formData.village) newErrors.village = "Required";
+      if (!formData.latitude) newErrors.latitude = "Required";
+      if (!formData.longitude) newErrors.longitude = "Required";
+    } else if (currentStep === 3) {
+      if (formData.surveyType === 'Institution') {
+        if (!formData.institutionName) newErrors.institutionName = "Required";
+        if (!formData.institutionType) newErrors.institutionType = "Required";
+        if (!formData.representativeName) newErrors.representativeName = "Required";
+        if (!formData.representativePhone) newErrors.representativePhone = "Required";
+        if (!formData.intendedUsage) newErrors.intendedUsage = "Required";
+        if (!formData.monthlyIncomeSource) newErrors.monthlyIncomeSource = "Required";
+      } else {
+        if (!formData.fullName) newErrors.fullName = "Required";
+        if (!formData.nationalId) newErrors.nationalId = "Required";
+        if (!formData.phoneNumber) newErrors.phoneNumber = "Required";
+        if (!formData.gender) newErrors.gender = "Required";
+        if (!formData.householdSize) newErrors.householdSize = "Required";
+        if (!formData.monthlyIncome) newErrors.monthlyIncome = "Required";
+        if (!formData.lightingSource) newErrors.lightingSource = "Required";
+        if (!formData.energyNeeds) newErrors.energyNeeds = "Required";
+        if (!formData.electricityAccess) newErrors.electricityAccess = "Required";
+        if (formData.devices.length === 0) newErrors.devices = "Required";
+      }
+    } else if (currentStep === 4) {
+      if (!formData.equipmentType) newErrors.equipmentType = "Required";
+      if (!formData.serialNumber) newErrors.serialNumber = "Required";
+      if (!formData.assignedSupplier) newErrors.assignedSupplier = "Required";
+      if (!formData.unitPrice) newErrors.unitPrice = "Required";
+      if (!formData.guarantee) newErrors.guarantee = "Required";
+      if (formData.guarantee === 'Guarantee' && !formData.guaranteePeriod) newErrors.guaranteePeriod = "Required";
+    } else if (currentStep === 5) {
+      if (formData.surveyType === 'Off-Grid') {
+        if (!formData.projectCapacity) newErrors.projectCapacity = "Required";
+        if (!formData.projectCost) newErrors.projectCost = "Required";
+        if (!formData.installationDate) newErrors.installationDate = "Required";
+        
+        if (formData.offGridType === 'Hydro Power') {
+          if (!formData.hydroPowerType) newErrors.hydroPowerType = "Required";
+          if (!formData.minimumFlow) newErrors.minimumFlow = "Required";
+          if (!formData.hydroHead) newErrors.hydroHead = "Required";
+          if (!formData.estimatedPowerOutput) newErrors.estimatedPowerOutput = "Required";
+        }
+        if (formData.offGridType === 'Solar Grid') {
+          if (!formData.solarPanelType) newErrors.solarPanelType = "Required";
+          if (!formData.noOfSolarPanel) newErrors.noOfSolarPanel = "Required";
+          if (!formData.solarPanelManufacture) newErrors.solarPanelManufacture = "Required";
+          if (!formData.solarPanelModel) newErrors.solarPanelModel = "Required";
+          if (!formData.batteryType) newErrors.batteryType = "Required";
+          if (!formData.noOfBattery) newErrors.noOfBattery = "Required";
+          if (!formData.batteryManufacture) newErrors.batteryManufacture = "Required";
+          if (!formData.batteryModel) newErrors.batteryModel = "Required";
+          if (!formData.batteryCapacity) newErrors.batteryCapacity = "Required";
+          if (!formData.totalEnergyOfBattery) newErrors.totalEnergyOfBattery = "Required";
+          if (!formData.systemVoltage) newErrors.systemVoltage = "Required";
+          if (!formData.inverterType) newErrors.inverterType = "Required";
+          if (!formData.inverterManufacture) newErrors.inverterManufacture = "Required";
+          if (!formData.inverterMode) newErrors.inverterMode = "Required";
+          if (!formData.noOfInverter) newErrors.noOfInverter = "Required";
+          if (!formData.inverterCapacity) newErrors.inverterCapacity = "Required";
+          if (!formData.breakerBoard) newErrors.breakerBoard = "Required";
+        }
+      } else {
+         if (!formData.installationDate) newErrors.installationDate = "Required";
+         if (!formData.installerName) newErrors.installerName = "Required";
+         if (!formData.salePrice) newErrors.salePrice = "Required";
+         if (!formData.batteryCapacity) newErrors.batteryCapacity = "Required";
+         if (!formData.comments) newErrors.comments = "Required";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setCurrentStep(prev => Math.min(prev + 1, 6));
+  };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  const updateFormData = (field, value) => {
+    const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
   const toggleDevice = (device) => {
@@ -107,6 +194,7 @@ const RegisterBeneficiary = () => {
         : [...prev.devices, device];
       return { ...prev, devices };
     });
+    setErrors(prev => ({ ...prev, devices: undefined }));
   };
 
   const renderStepIndicator = () => (
@@ -144,6 +232,7 @@ const RegisterBeneficiary = () => {
       </div>
       
       <div className="grid gap-4 mt-6">
+        {errors.surveyType && <p className="text-red-500 text-xs mt-1 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> {errors.surveyType}</p>}
         {[
           { id: 'Home/Lantern', icon: Sun, desc: 'Individual household solar system or solar lantern distribution' },
           { id: 'Institution', icon: Building2, desc: 'School, health post, hospital, government office or mosque' },
@@ -167,8 +256,10 @@ const RegisterBeneficiary = () => {
               </div>
             </button>
             {type.id === 'Off-Grid' && formData.surveyType === 'Off-Grid' && (
-              <div className="ml-16 mt-4 grid grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2">
-                {['Solar Grid', 'Hydro Power', 'Wind'].map(ogt => (
+              <div className="ml-16 mt-4">
+                {errors.offGridType && <p className="text-red-500 text-xs mt-1 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> {errors.offGridType}</p>}
+                <div className="grid grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2">
+                  {['Solar Grid', 'Hydro Power', 'Wind'].map(ogt => (
                   <button
                     key={ogt}
                     onClick={() => updateFormData('offGridType', ogt)}
@@ -181,6 +272,7 @@ const RegisterBeneficiary = () => {
                     {ogt}
                   </button>
                 ))}
+                </div>
               </div>
             )}
           </div>
@@ -225,7 +317,7 @@ const RegisterBeneficiary = () => {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Kebele</label>
+          <label className="text-sm font-semibold text-slate-700">Kebele *</label>
           <input 
             type="text" 
             placeholder="Kebele number or name"
@@ -235,7 +327,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Village / Locality</label>
+          <label className="text-sm font-semibold text-slate-700">Village / Locality *</label>
           <input 
             type="text" 
             placeholder="Village name"
@@ -245,7 +337,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">GPS Latitude</label>
+          <label className="text-sm font-semibold text-slate-700">GPS Latitude *</label>
           <input 
             type="text" 
             placeholder="e.g. 12.9697"
@@ -255,7 +347,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">GPS Longitude</label>
+          <label className="text-sm font-semibold text-slate-700">GPS Longitude *</label>
           <input 
             type="text" 
             placeholder="e.g. 37.7621"
@@ -318,7 +410,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Representative Phone</label>
+                <label className="text-sm font-semibold text-slate-700">Representative Phone *</label>
                 <input 
                   type="text" 
                   placeholder="+251 9..."
@@ -328,7 +420,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Intended Usage</label>
+                <label className="text-sm font-semibold text-slate-700">Intended Usage *</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Classroom lighting and computer lab"
@@ -338,7 +430,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Monthly Income Source</label>
+                <label className="text-sm font-semibold text-slate-700">Monthly Income Source *</label>
                 <select 
                   className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                   value={formData.monthlyIncomeSource}
@@ -422,7 +514,7 @@ const RegisterBeneficiary = () => {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Monthly Income</label>
+            <label className="text-sm font-semibold text-slate-700">Monthly Income *</label>
              <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.monthlyIncome}
@@ -441,7 +533,7 @@ const RegisterBeneficiary = () => {
         <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Energy Usage</h5>
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Current Lighting Source</label>
+            <label className="text-sm font-semibold text-slate-700">Current Lighting Source *</label>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.lightingSource}
@@ -454,7 +546,7 @@ const RegisterBeneficiary = () => {
             </select>
           </div>
            <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Daily Energy Needs</label>
+            <label className="text-sm font-semibold text-slate-700">Daily Energy Needs *</label>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.energyNeeds}
@@ -469,7 +561,8 @@ const RegisterBeneficiary = () => {
         </div>
 
         <div className="space-y-3 mb-6">
-          <label className="text-sm font-semibold text-slate-700">Current Electricity Access</label>
+          <label className="text-sm font-semibold text-slate-700">Current Electricity Access *</label>
+          {errors.electricityAccess && <p className="text-red-500 text-xs mb-2 flex items-center gap-1 w-full"><AlertTriangle className="w-3 h-3"/> {errors.electricityAccess}</p>}
           <div className="flex gap-2">
             <button 
               onClick={() => updateFormData('electricityAccess', 'Yes')}
@@ -483,7 +576,8 @@ const RegisterBeneficiary = () => {
         </div>
 
         <div className="space-y-3">
-          <label className="text-sm font-semibold text-slate-700">Devices Used (select all that apply)</label>
+          <label className="text-sm font-semibold text-slate-700">Devices Used (select all that apply) *</label>
+          {errors.devices && <p className="text-red-500 text-xs mb-2 w-full flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> {errors.devices}</p>}
           <div className="flex flex-wrap gap-2">
             {['Phone Charging', 'Radio', 'TV', 'Fan', 'Refrigerator', 'Medical Equipment', 'Water Pump', 'Computer'].map(device => (
               <button
@@ -516,6 +610,7 @@ const RegisterBeneficiary = () => {
          <div className="col-span-2 space-y-2">
           <label className="text-sm font-semibold text-slate-700">Equipment Type *</label>
           <div className="flex gap-2">
+            {errors.equipmentType && <p className="text-red-500 text-xs mb-2 flex items-center gap-1 w-full"><AlertTriangle className="w-3 h-3"/> {errors.equipmentType}</p>}
             <button 
               onClick={() => updateFormData('equipmentType', 'Home Solar System')}
               className={`flex-1 py-3 px-4 font-semibold rounded-xl border flex items-center justify-center gap-2 ${formData.equipmentType === 'Home Solar System' ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
@@ -572,7 +667,7 @@ const RegisterBeneficiary = () => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Unit Price (ETB)</label>
+          <label className="text-sm font-semibold text-slate-700">Unit Price (ETB) *</label>
           <input 
             type="number" 
             placeholder="e.g. 2345"
@@ -582,8 +677,9 @@ const RegisterBeneficiary = () => {
           />
         </div>
          <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Guarantee</label>
+          <label className="text-sm font-semibold text-slate-700">Guarantee *</label>
           <div className="flex gap-2">
+            {errors.guarantee && <p className="text-red-500 text-xs mb-2 flex items-center gap-1 w-full"><AlertTriangle className="w-3 h-3"/> {errors.guarantee}</p>}
             <button 
               onClick={() => updateFormData('guarantee', 'Guarantee')}
               className={`flex-1 py-3 font-semibold rounded-xl border ${formData.guarantee === 'Guarantee' ? 'border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
@@ -597,7 +693,7 @@ const RegisterBeneficiary = () => {
 
         {formData.guarantee === 'Guarantee' && (
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Guarantee Period (Years)</label>
+            <label className="text-sm font-semibold text-slate-700">Guarantee Period (Years) *</label>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.guaranteePeriod}
@@ -809,7 +905,7 @@ const RegisterBeneficiary = () => {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Installation Date</label>
+          <label className="text-sm font-semibold text-slate-700">Installation Date *</label>
           <input 
             type="date"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600"
@@ -818,7 +914,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
          <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Installer / Agent Name</label>
+          <label className="text-sm font-semibold text-slate-700">Installer / Agent Name *</label>
           <input 
             type="text"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -827,7 +923,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Sale Price (ETB)</label>
+          <label className="text-sm font-semibold text-slate-700">Sale Price (ETB) *</label>
           <input 
             type="number"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -836,7 +932,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
          <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah)</label>
+          <label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah) *</label>
           <input 
             type="number"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -845,7 +941,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="col-span-2 space-y-2">
-           <label className="text-sm font-semibold text-slate-700">Additional Comments</label>
+           <label className="text-sm font-semibold text-slate-700">Additional Comments *</label>
            <textarea 
             placeholder="Any additional notes or observations..."
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-y"
