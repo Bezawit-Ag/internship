@@ -324,7 +324,7 @@ const RegisterBeneficiary = () => {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Zone *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Zone *</label>{errors.zone && <span className="text-red-500 text-xs">Required</span>}</div>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.zone}
@@ -337,7 +337,7 @@ const RegisterBeneficiary = () => {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Woreda *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Woreda *</label>{errors.woreda && <span className="text-red-500 text-xs">Required</span>}</div>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.woreda}
@@ -351,7 +351,7 @@ const RegisterBeneficiary = () => {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Kebele *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Kebele *</label>{errors.kebele && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text" 
             placeholder="Kebele number or name"
@@ -361,7 +361,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Village / Locality *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Village / Locality *</label>{errors.village && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text" 
             placeholder="Village name"
@@ -371,7 +371,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">GPS Latitude *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">GPS Latitude *</label>{errors.latitude && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text" 
             placeholder="e.g. 12.9697"
@@ -381,7 +381,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">GPS Longitude *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">GPS Longitude *</label>{errors.longitude && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text" 
             placeholder="e.g. 37.7621"
@@ -406,7 +406,7 @@ const RegisterBeneficiary = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Institution Name *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Institution Name *</label>{errors.institutionName && <span className="text-red-500 text-xs">Required</span>}</div>
                 <input 
                   type="text" 
                   placeholder="e.g. Dabat Primary School"
@@ -416,7 +416,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Institution Type *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Institution Type *</label>{errors.institutionType && <span className="text-red-500 text-xs">Required</span>}</div>
                 <select 
                   className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                   value={formData.institutionType}
@@ -434,7 +434,7 @@ const RegisterBeneficiary = () => {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Representative Name *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Representative Name *</label>{errors.representativeName && <span className="text-red-500 text-xs">Required</span>}</div>
                 <input 
                   type="text" 
                   placeholder="Name of institution head"
@@ -444,7 +444,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Representative Phone *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Representative Phone *</label>{errors.representativePhone && <span className="text-red-500 text-xs">Required</span>}</div>
                 <input 
                   type="text" 
                   placeholder="+251 9..."
@@ -454,7 +454,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Intended Usage *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Intended Usage *</label>{errors.intendedUsage && <span className="text-red-500 text-xs">Required</span>}</div>
                 <input 
                   type="text" 
                   placeholder="e.g. Classroom lighting and computer lab"
@@ -464,7 +464,7 @@ const RegisterBeneficiary = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Monthly Income Source *</label>
+                <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Monthly Income Source *</label>{errors.monthlyIncomeSource && <span className="text-red-500 text-xs">Required</span>}</div>
                 <select 
                   className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                   value={formData.monthlyIncomeSource}
@@ -493,7 +493,7 @@ const RegisterBeneficiary = () => {
 
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Full Name *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Full Name *</label>{errors.fullName && <span className="text-red-500 text-xs">Required</span>}</div>
             <input 
               type="text" 
               placeholder="e.g. Abebe Bikila"
@@ -503,7 +503,7 @@ const RegisterBeneficiary = () => {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">National ID *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">National ID *</label>{errors.nationalId && <span className="text-red-500 text-xs">Required</span>}</div>
             <input 
               type="text" 
               placeholder="ET-XX-000-0000"
@@ -513,7 +513,7 @@ const RegisterBeneficiary = () => {
             />
           </div>
           <div className="space-y-2">
-             <label className="text-sm font-semibold text-slate-700">Phone Number *</label>
+             <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Phone Number *</label>{errors.phoneNumber && <span className="text-red-500 text-xs">Required</span>}</div>
              <input 
               type="text" 
               placeholder="+251 9..."
@@ -523,7 +523,7 @@ const RegisterBeneficiary = () => {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Gender *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Gender *</label>{errors.gender && <span className="text-red-500 text-xs">Required</span>}</div>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.gender}
@@ -535,7 +535,7 @@ const RegisterBeneficiary = () => {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Household Size *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Household Size *</label>{errors.householdSize && <span className="text-red-500 text-xs">Required</span>}</div>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.householdSize}
@@ -548,7 +548,7 @@ const RegisterBeneficiary = () => {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Monthly Income *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Monthly Income *</label>{errors.monthlyIncome && <span className="text-red-500 text-xs">Required</span>}</div>
              <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.monthlyIncome}
@@ -567,7 +567,7 @@ const RegisterBeneficiary = () => {
         <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Energy Usage</h5>
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Current Lighting Source *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Current Lighting Source *</label>{errors.lightingSource && <span className="text-red-500 text-xs">Required</span>}</div>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.lightingSource}
@@ -580,7 +580,7 @@ const RegisterBeneficiary = () => {
             </select>
           </div>
            <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Daily Energy Needs *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Daily Energy Needs *</label>{errors.energyNeeds && <span className="text-red-500 text-xs">Required</span>}</div>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.energyNeeds}
@@ -667,7 +667,7 @@ const RegisterBeneficiary = () => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Equipment Serial Number *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Equipment Serial Number *</label>{errors.serialNumber && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text" 
             placeholder="e.g. 997890"
@@ -677,9 +677,9 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">
             {formData.surveyType === 'Institution' || formData.surveyType === 'Off-Grid' ? 'Contractor' : 'Assigned Supplier'} *
-          </label>
+          </label>{errors.assignedSupplier && <span className="text-red-500 text-xs">Required</span>}</div>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             value={formData.assignedSupplier}
@@ -701,7 +701,7 @@ const RegisterBeneficiary = () => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Unit Price (ETB) *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Unit Price (ETB) *</label>{errors.unitPrice && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="number" 
             placeholder="e.g. 2345"
@@ -727,7 +727,7 @@ const RegisterBeneficiary = () => {
 
         {formData.guarantee === 'Guarantee' && (
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Guarantee Period (Years) *</label>
+            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Guarantee Period (Years) *</label>{errors.guaranteePeriod && <span className="text-red-500 text-xs">Required</span>}</div>
             <select 
               className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={formData.guaranteePeriod}
@@ -774,16 +774,16 @@ const RegisterBeneficiary = () => {
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Project Capacity (KW)</label>
+              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Project Capacity (KW)</label>{errors.projectCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
               <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCapacity} onChange={(e) => updateFormData('projectCapacity', e.target.value)} />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Project Cost</label>
+              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Project Cost</label>{errors.projectCost && <span className="text-red-500 text-xs">Required</span>}</div>
               <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCost} onChange={(e) => updateFormData('projectCost', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Date of Installation / Construction Year</label>
+              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Date of Installation / Construction Year</label>{errors.installationDate && <span className="text-red-500 text-xs">Required</span>}</div>
               <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.installationDate} onChange={(e) => updateFormData('installationDate', e.target.value)} />
             </div>
 
@@ -793,7 +793,7 @@ const RegisterBeneficiary = () => {
                    <h5 className="font-bold text-slate-700 mb-4">Hydro Power Details</h5>
                 </div>
                 <div className="col-span-2 space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Hydro Power Type</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Hydro Power Type</label>{errors.hydroPowerType && <span className="text-red-500 text-xs">Required</span>}</div>
                   <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.hydroPowerType} onChange={(e) => updateFormData('hydroPowerType', e.target.value)}>
                     <option value="">Select...</option>
                     <option value="Pico Hydro Power <=5KW">Pico Hydro Power {"<="}5KW</option>
@@ -805,15 +805,15 @@ const RegisterBeneficiary = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Minimum Flow (M3/sec)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Minimum Flow (M3/sec)</label>{errors.minimumFlow && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.minimumFlow} onChange={(e) => updateFormData('minimumFlow', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Head (m)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Head (m)</label>{errors.hydroHead && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.hydroHead} onChange={(e) => updateFormData('hydroHead', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Estimated Power output (KW)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Estimated Power output (KW)</label>{errors.estimatedPowerOutput && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.estimatedPowerOutput} onChange={(e) => updateFormData('estimatedPowerOutput', e.target.value)} />
                 </div>
               </>
@@ -825,7 +825,7 @@ const RegisterBeneficiary = () => {
                    <h5 className="font-bold text-slate-700 mb-4">Solar Panel Information</h5>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Solar Panel Type</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Type</label>{errors.solarPanelType && <span className="text-red-500 text-xs">Required</span>}</div>
                   <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.solarPanelType} onChange={(e) => updateFormData('solarPanelType', e.target.value)}>
                      <option value="">Select...</option>
                      <option value="Mon Crystal">Mon Crystal</option>
@@ -834,15 +834,15 @@ const RegisterBeneficiary = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">No of Solar Panel</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Solar Panel</label>{errors.noOfSolarPanel && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfSolarPanel} onChange={(e) => updateFormData('noOfSolarPanel', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Solar Panel Manufacture</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Manufacture</label>{errors.solarPanelManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelManufacture} onChange={(e) => updateFormData('solarPanelManufacture', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Solar Panel Model</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Model</label>{errors.solarPanelModel && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelModel} onChange={(e) => updateFormData('solarPanelModel', e.target.value)} />
                 </div>
 
@@ -850,7 +850,7 @@ const RegisterBeneficiary = () => {
                    <h5 className="font-bold text-slate-700 mb-4">Battery Information</h5>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Battery Type</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Type</label>{errors.batteryType && <span className="text-red-500 text-xs">Required</span>}</div>
                   <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.batteryType} onChange={(e) => updateFormData('batteryType', e.target.value)}>
                      <option value="">Select...</option>
                      <option value="Lead Acid">Lead Acid</option>
@@ -859,23 +859,23 @@ const RegisterBeneficiary = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">No of Battery</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Battery</label>{errors.noOfBattery && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfBattery} onChange={(e) => updateFormData('noOfBattery', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Battery Manufacture</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Manufacture</label>{errors.batteryManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryManufacture} onChange={(e) => updateFormData('batteryManufacture', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Battery Model</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Model</label>{errors.batteryModel && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryModel} onChange={(e) => updateFormData('batteryModel', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Battery Capacity (Ahr)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Capacity (Ahr)</label>{errors.batteryCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryCapacity} onChange={(e) => updateFormData('batteryCapacity', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Total Energy of Batter (KWhr)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Total Energy of Batter (KWhr)</label>{errors.totalEnergyOfBattery && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.totalEnergyOfBattery} onChange={(e) => updateFormData('totalEnergyOfBattery', e.target.value)} />
                 </div>
 
@@ -883,7 +883,7 @@ const RegisterBeneficiary = () => {
                    <h5 className="font-bold text-slate-700 mb-4">Inverter & System Information</h5>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">System Voltage (V)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">System Voltage (V)</label>{errors.systemVoltage && <span className="text-red-500 text-xs">Required</span>}</div>
                   <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.systemVoltage} onChange={(e) => updateFormData('systemVoltage', e.target.value)}>
                      <option value="">Select...</option>
                      <option value="12V">12V</option>
@@ -895,7 +895,7 @@ const RegisterBeneficiary = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Inverter Type</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Type</label>{errors.inverterType && <span className="text-red-500 text-xs">Required</span>}</div>
                   <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.inverterType} onChange={(e) => updateFormData('inverterType', e.target.value)}>
                      <option value="">Select...</option>
                      <option value="Off Gride">Off Gride</option>
@@ -904,23 +904,23 @@ const RegisterBeneficiary = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Invertor Manufacture</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Invertor Manufacture</label>{errors.inverterManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterManufacture} onChange={(e) => updateFormData('inverterManufacture', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Inverter Mode</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Mode</label>{errors.inverterMode && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterMode} onChange={(e) => updateFormData('inverterMode', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">No of Inverter/Charge Controller</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Inverter/Charge Controller</label>{errors.noOfInverter && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfInverter} onChange={(e) => updateFormData('noOfInverter', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Inverter Capacity (KW)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Capacity (KW)</label>{errors.inverterCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterCapacity} onChange={(e) => updateFormData('inverterCapacity', e.target.value)} />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <label className="text-sm font-semibold text-slate-700">Breaker Board (SDB)</label>
+                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Breaker Board (SDB)</label>{errors.breakerBoard && <span className="text-red-500 text-xs">Required</span>}</div>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.breakerBoard} onChange={(e) => updateFormData('breakerBoard', e.target.value)} />
                 </div>
               </>
@@ -939,7 +939,7 @@ const RegisterBeneficiary = () => {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Installation Date *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Installation Date *</label>{errors.installationDate && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="date"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600"
@@ -948,7 +948,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
          <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Installer / Agent Name *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Installer / Agent Name *</label>{errors.installerName && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="text"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -957,7 +957,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Sale Price (ETB) *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Sale Price (ETB) *</label>{errors.salePrice && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="number"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -966,7 +966,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
          <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah) *</label>
+          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah) *</label>{errors.batteryCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
             type="number"
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -975,7 +975,7 @@ const RegisterBeneficiary = () => {
           />
         </div>
         <div className="col-span-2 space-y-2">
-           <label className="text-sm font-semibold text-slate-700">Additional Comments *</label>
+           <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Additional Comments *</label>{errors.comments && <span className="text-red-500 text-xs">Required</span>}</div>
            <textarea 
             placeholder="Any additional notes or observations..."
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-y"
@@ -1055,7 +1055,7 @@ const RegisterBeneficiary = () => {
 
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 mb-6">
         <div className="min-h-[400px]">
-          {currentStep === 1 && <Step1 />}
+          {currentStep === 1 && Step1()}
           {currentStep > 1 && !['Home/Lantern', 'Institution', 'Off-Grid'].includes(formData.surveyType) ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500 py-20">
               <AlertTriangle className="w-12 h-12 mb-4 text-blue-300" />
@@ -1064,11 +1064,11 @@ const RegisterBeneficiary = () => {
             </div>
           ) : (
             <>
-              {currentStep === 2 && <Step2 />}
-              {currentStep === 3 && <Step3 />}
-              {currentStep === 4 && <Step4 />}
-              {currentStep === 5 && <Step5 />}
-              {currentStep === 6 && <Step6 />}
+              {currentStep === 2 && Step2()}
+              {currentStep === 3 && Step3()}
+              {currentStep === 4 && Step4()}
+              {currentStep === 5 && Step5()}
+              {currentStep === 6 && Step6()}
             </>
           )}
         </div>
