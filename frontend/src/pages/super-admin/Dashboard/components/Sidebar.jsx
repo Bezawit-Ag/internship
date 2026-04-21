@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Map, HeartHandshake, FileText, UserCog, History, Settings, LogOut, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Users, Map, Wrench, FileText, UserCog, History, Settings, LogOut, ChevronLeft } from "lucide-react";
 import logo from '../../../../assets/logo.png';
 
 export default function Sidebar({ activeMenu, setActiveMenu }) {
@@ -6,7 +6,7 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
     { name: "Dashboard", icon: LayoutDashboard },
     { name: "Supplier Management", icon: Users },
     { name: "Area Assignment", icon: Map },
-    { name: "Beneficiaries", icon: HeartHandshake },
+    { name: "Contractor Registration", icon: Wrench },
     { name: "Reports", icon: FileText },
     { name: "User Management", icon: UserCog },
     { name: "Audit Logs", icon: History },
