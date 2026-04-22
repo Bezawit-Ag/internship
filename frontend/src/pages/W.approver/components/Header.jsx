@@ -1,6 +1,6 @@
 import { Search, Bell, User, CheckCircle2 } from "lucide-react";
 
-export default function Header({ activeMenu }) {
+export default function Header({ activeMenu, selectedScope }) {
    return (
       <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-8 sticky top-0 z-10 w-full rounded-none md:pl-8 shadow-sm">
          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
@@ -8,6 +8,8 @@ export default function Header({ activeMenu }) {
             <span>Approver Console</span>
             <span className="mx-1 text-slate-300">/</span>
             <span className="text-indigo-600 font-bold">{activeMenu}</span>
+            <span className="mx-1 text-slate-300">/</span>
+            <span className="text-emerald-700 font-bold">{selectedScope.zone} / {selectedScope.woreda}</span>
          </div>
 
          <div className="flex items-center gap-6">

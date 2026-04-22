@@ -1,7 +1,7 @@
 import { Search, Bell, User, CheckCircle2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-export default function Header() {
+export default function Header({ selectedZone }) {
    const location = useLocation();
    const activeMenu = location.pathname.includes("problems") ? "Problem Approval" : "Approval Queue";
 
@@ -12,6 +12,8 @@ export default function Header() {
             <span>Zone Approver Console</span>
             <span className="mx-1 text-slate-300">/</span>
             <span className="text-blue-600 font-bold">{activeMenu}</span>
+            <span className="mx-1 text-slate-300">/</span>
+            <span className="text-emerald-700 font-bold">{selectedZone}</span>
          </div>
 
          <div className="flex items-center gap-6">

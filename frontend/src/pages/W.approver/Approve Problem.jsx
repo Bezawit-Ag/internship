@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Search, AlertOctagon, Wrench, CheckCircle2, FileText, Eye } from 'lucide-react';
 import ProblemDetailsModal from '../../components/ProblemDetailsModal';
 
-const ApproveProblem = () => {
+const ApproveProblem = ({ selectedScope }) => {
   const [problems, setProblems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('All Zones');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [activeProblem, setActiveProblem] = useState(null);
 
@@ -45,19 +44,18 @@ const ApproveProblem = () => {
     const term = searchTerm.toLowerCase();
     const matchSearch = p.beneficiary_name?.toLowerCase().includes(term) || 
       p.equipment?.toLowerCase().includes(term);
-    const matchZone = zoneFilter === 'All Zones' ? true : p.zone === zoneFilter;
+    const matchZone = p.zone === selectedScope.zone && p.woreda === selectedScope.woreda;
     const matchStatus = statusFilter === 'All Status' ? true : p.status === statusFilter;
     return matchSearch && matchZone && matchStatus;
   });
 
-  const uniqueZones = [...new Set(problems.map(p => p.zone).filter(Boolean))];
   const uniqueStatuses = [...new Set(problems.map(p => p.status).filter(Boolean))];
 
   const stats = {
-    total: problems.length,
-    open: problems.filter(p => p.status === 'Open' || p.status === 'Pending').length,
-    repair: problems.filter(p => p.status === 'Under Repair').length,
-    resolved: problems.filter(p => p.status === 'Resolved').length
+    total: filtered.length,
+    open: filtered.filter(p => p.status === 'Open' || p.status === 'Pending').length,
+    repair: filtered.filter(p => p.status === 'Under Repair').length,
+    resolved: filtered.filter(p => p.status === 'Resolved').length
   };
 
   const getStatusColor = (status) => {
@@ -77,7 +75,7 @@ const ApproveProblem = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
       <div className="mb-8">
         <h3 className="text-2xl font-bold text-slate-800">Equipment Issues</h3>
-        <p className="text-slate-500 mt-1">System-wide equipment non-functionality overview (read-only)</p>
+        <p className="text-slate-500 mt-1">Equipment non-functionality in {selectedScope.zone} / {selectedScope.woreda}</p>
       </div>
 
       <div className="grid grid-cols-4 gap-6 mb-8">
@@ -120,14 +118,6 @@ const ApproveProblem = () => {
              />
            </div>
            <div className="flex gap-3">
-             <select 
-               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
-               value={zoneFilter}
-               onChange={(e) => setZoneFilter(e.target.value)}
-             >
-                <option value="All Zones">All Zones</option>
-                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
-             </select>
              <select 
                className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
                value={statusFilter}

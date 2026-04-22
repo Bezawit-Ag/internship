@@ -1,13 +1,15 @@
 import React from 'react';
 import { Bell, Search } from 'lucide-react';
 
-const Header = ({ activeMenu }) => {
+const Header = ({ activeMenu, selectedZone }) => {
   return (
     <header className="bg-white border-b border-slate-100 h-20 px-8 flex items-center justify-between shrink-0 sticky top-0 z-10">
       <div className="flex items-center gap-2 text-sm text-slate-500">
         <span className="text-blue-500 font-medium">Main Console</span>
         <span className="text-slate-300">/</span>
         <span className="font-semibold text-slate-800">{activeMenu}</span>
+        <span className="text-slate-300">/</span>
+        <span className="font-semibold text-emerald-700">{selectedZone}</span>
       </div>
 
       <div className="flex items-center gap-6">

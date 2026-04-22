@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Search, Eye, Filter } from 'lucide-react';
 import BeneficiaryDetailsModal from '../../components/BeneficiaryDetailsModal';
 
-const ApproveBeneficiary = () => {
+const ApproveBeneficiary = ({ selectedScope }) => {
   const [beneficiaries, setBeneficiaries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('All Zones');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [activeBeneficiary, setActiveBeneficiary] = useState(null);
 
@@ -44,12 +43,11 @@ const ApproveBeneficiary = () => {
   const filtered = beneficiaries.filter(b => {
     const term = searchTerm.toLowerCase();
     const matchSearch = b.full_name?.toLowerCase().includes(term) || b.national_id?.toLowerCase().includes(term) || b.woreda?.toLowerCase().includes(term);
-    const matchZone = zoneFilter === 'All Zones' ? true : b.zone === zoneFilter;
+    const matchZone = b.zone === selectedScope.zone && b.woreda === selectedScope.woreda;
     const matchStatus = statusFilter === 'All Status' ? true : b.status === statusFilter;
     return matchSearch && matchZone && matchStatus;
   });
 
-  const uniqueZones = [...new Set(beneficiaries.map(b => b.zone).filter(Boolean))];
   const uniqueStatuses = [...new Set(beneficiaries.map(b => b.status).filter(Boolean))];
 
   const getStatusColor = (status) => {
@@ -69,7 +67,7 @@ const ApproveBeneficiary = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
       <div className="mb-8">
         <h3 className="text-2xl font-bold text-slate-800">Beneficiaries</h3>
-        <p className="text-slate-500 mt-1">{beneficiaries.length} records • Solar equipment recipients</p>
+        <p className="text-slate-500 mt-1">{filtered.length} records • {selectedScope.zone} / {selectedScope.woreda}</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -85,14 +83,6 @@ const ApproveBeneficiary = () => {
              />
            </div>
            <div className="flex gap-3">
-             <select 
-               className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
-               value={zoneFilter}
-               onChange={(e) => setZoneFilter(e.target.value)}
-             >
-                <option value="All Zones">All Zones</option>
-                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
-             </select>
              <select 
                className="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
                value={statusFilter}

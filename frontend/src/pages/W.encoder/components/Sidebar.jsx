@@ -1,7 +1,7 @@
 import { ClipboardList, AlertTriangle, RefreshCw, Bell, ChevronLeft, LogOut } from "lucide-react";
 import logo from '../../../assets/logo.png';
 
-export default function Sidebar({ activeMenu, setActiveMenu }) {
+export default function Sidebar({ activeMenu, setActiveMenu, selectedScope }) {
   const menuItems = [
     { name: "Notifications", icon: Bell },
     { name: "Beneficiary Registration", icon: ClipboardList },
@@ -26,6 +26,7 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
           <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Logged In As</span>
           <span className="text-sm font-bold text-slate-800">Woreda Encoder</span>
           <span className="text-[10px] bg-blue-100 text-blue-700 w-max px-2 py-0.5 rounded-full font-bold">ENCODER</span>
+          <span className="text-[10px] font-semibold text-emerald-700">{selectedScope.zone} / {selectedScope.woreda}</span>
         </div>
       </div>
 

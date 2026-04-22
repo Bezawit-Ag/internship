@@ -4,20 +4,6 @@ import {
   Eye, CheckCircle2, Wrench, AlertOctagon, ArrowLeft
 } from 'lucide-react';
 
-const ZONE_WOREDAS = {
-  "North Gondar": ["Debark", "Dabat", "Dabal", "Chilga"],
-  "South Gondar": ["Debre Tabor", "Farta", "Fogera"],
-  "North Wollo": ["Woldiya", "Kobo"],
-  "South Wollo": ["Dessie Zuria", "Kombolcha"],
-  "Awi": ["Dangila", "Injibara", "Banja"],
-  "East Gojjam": ["Debre Markos", "Bichena", "Debre Elias"],
-  "West Gojjam": ["Finote Selam", "Bure"],
-  "Wag Hemra": ["Sekota"],
-  "Oromia": ["Kemise", "Bati"],
-  "Central Gondar": ["Gondar", "Chilga"],
-  "Benshangul": ["Assosa", "Bambasi"]
-};
-
 const MAIN_CAUSES = {
   'Home/Lantern': ['Solar Panels', 'Battery', 'Charge Control', 'Cable', 'Switch On/Off', 'Port', 'Lamp', 'Radio', 'Torch/Hand Battery', 'Tv'],
   'Institution': ['Solar Panels', 'Battery', 'Invertor', 'Cable', 'Barker (Breaker)'],
@@ -79,7 +65,7 @@ const INITIAL_MOCK_PROBLEMS = [
   }
 ];
 
-const RegisterProblem = () => {
+const RegisterProblem = ({ selectedScope }) => {
   const [problems, setProblems] = useState(INITIAL_MOCK_PROBLEMS);
   const [showForm, setShowForm] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState(null);
@@ -93,8 +79,8 @@ const RegisterProblem = () => {
     problemLevel: '',
     installationDate: '',
     nonFunctionalDate: '',
-    zone: '',
-    woreda: '',
+    zone: selectedScope.zone,
+    woreda: selectedScope.woreda,
     mainCause: '',
     repairDate: '',
     functionalAgainDate: '',
@@ -144,14 +130,15 @@ const RegisterProblem = () => {
       const matchSearch = p.beneficiary.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.serialNo.toLowerCase().includes(searchQuery.toLowerCase());
       const matchStatus = statusFilter ? p.status === statusFilter : true;
-      return matchSearch && matchStatus;
+      const matchScope = p.zone === selectedScope.zone && p.woreda === selectedScope.woreda;
+      return matchSearch && matchStatus && matchScope;
     });
-  }, [problems, searchQuery, statusFilter]);
+  }, [problems, searchQuery, statusFilter, selectedScope.zone, selectedScope.woreda]);
 
   const stats = {
-    open: problems.filter(p => p.status === 'Open').length,
-    repair: problems.filter(p => p.status === 'Under Repair').length,
-    resolved: problems.filter(p => p.status === 'Resolved').length
+    open: filteredProblems.filter(p => p.status === 'Open').length,
+    repair: filteredProblems.filter(p => p.status === 'Under Repair').length,
+    resolved: filteredProblems.filter(p => p.status === 'Resolved').length
   };
 
   const updateProblemStatus = (id, newStatus) => {
@@ -165,8 +152,8 @@ const RegisterProblem = () => {
         equipment: formData.equipmentType || 'Unknown',
         title: formData.problemLevel || 'Reported Issue',
         category: formData.mainCause || formData.problemDescription || 'Uncategorized',
-        zone: formData.zone,
-        woreda: formData.woreda,
+        zone: selectedScope.zone,
+        woreda: selectedScope.woreda,
         kebele: '-',
         urgency: formData.problemLevel?.includes('Not functional') ? 'High' : 'Medium',
         beneficiary_name: formData.beneficiaryName || 'Unknown',
@@ -448,27 +435,20 @@ const RegisterProblem = () => {
                 <label className="text-sm font-semibold text-slate-700">Zone *</label>
                 <select 
                   className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  value={formData.zone}
-                  onChange={(e) => updateFormData('zone', e.target.value)}
+                  value={selectedScope.zone}
+                  disabled
                 >
-                  <option value="">Select Zone</option>
-                  {Object.keys(ZONE_WOREDAS).map(zone => (
-                    <option key={zone} value={zone}>{zone}</option>
-                  ))}
+                  <option value={selectedScope.zone}>{selectedScope.zone}</option>
                 </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Woreda *</label>
                 <select 
                   className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  value={formData.woreda}
-                  onChange={(e) => updateFormData('woreda', e.target.value)}
-                  disabled={!formData.zone}
+                  value={selectedScope.woreda}
+                  disabled
                 >
-                  <option value="">{formData.zone ? "Select Woreda" : "Select Zone first"}</option>
-                  {formData.zone && ZONE_WOREDAS[formData.zone].map(woreda => (
-                    <option key={woreda} value={woreda}>{woreda}</option>
-                  ))}
+                  <option value={selectedScope.woreda}>{selectedScope.woreda}</option>
                 </select>
               </div>
 

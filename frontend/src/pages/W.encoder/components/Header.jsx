@@ -1,12 +1,14 @@
 import { Search, Bell, User } from "lucide-react";
 
-export default function Header({ activeMenu }) {
+export default function Header({ activeMenu, selectedScope }) {
    return (
       <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-10 w-full rounded-tl-[40px] md:pl-8">
          <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
             <span>Woreda Console</span>
             <span className="mx-1">›</span>
             <span className="text-blue-600 font-bold">{activeMenu}</span>
+            <span className="mx-1">›</span>
+            <span className="text-emerald-700 font-bold">{selectedScope.zone} / {selectedScope.woreda}</span>
          </div>
 
          <div className="flex items-center gap-6">

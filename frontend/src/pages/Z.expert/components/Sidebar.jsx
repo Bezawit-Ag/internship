@@ -2,7 +2,7 @@ import React from 'react';
 import { Users, FileText, LayoutDashboard, LogOut, ChevronLeft } from 'lucide-react';
 import logo from '../../../assets/logo.png';
 
-const Sidebar = ({ activeMenu, setActiveMenu }) => {
+const Sidebar = ({ activeMenu, setActiveMenu, selectedZone }) => {
   return (
     <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto z-20 font-sans">
       <div className="p-6">
@@ -20,6 +20,7 @@ const Sidebar = ({ activeMenu, setActiveMenu }) => {
           <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Logged In As</span>
           <span className="text-sm font-bold text-slate-800">Zone Expert</span>
           <span className="text-[10px] bg-blue-100 text-blue-700 w-max px-2 py-0.5 rounded-full font-bold">EXPERT</span>
+          <span className="text-[10px] font-semibold text-emerald-700">{selectedZone}</span>
         </div>
       </div>
 

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, CheckSquare, AlertTriangle, LogOut, ChevronLeft } from 'lucide-react';
 import logo from '../../../assets/logo.png';
 
-const Sidebar = () => {
+const Sidebar = ({ selectedZone }) => {
   const location = useLocation();
 
   return (
@@ -23,6 +23,7 @@ const Sidebar = () => {
           <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Logged In As</span>
           <span className="text-sm font-bold text-slate-800">Zone Approver</span>
           <span className="text-[10px] bg-blue-100 text-blue-700 w-max px-2 py-0.5 rounded-full font-bold">APPROVER</span>
+          <span className="text-[10px] font-semibold text-emerald-700">{selectedZone}</span>
         </div>
       </div>
 

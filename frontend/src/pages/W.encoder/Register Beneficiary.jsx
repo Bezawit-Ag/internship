@@ -15,27 +15,13 @@ const STEPS = [
   { id: 6, label: 'Review', icon: CheckCircle2 }
 ];
 
-const ZONE_WOREDAS = {
-  "North Gondar": ["Debark", "Dabat", "Dabal"],
-  "South Gondar": ["Debre Tabor", "Farta", "Fogera"],
-  "North Wollo": ["Woldiya", "Kobo"],
-  "South Wollo": ["Dessie Zuria", "Kombolcha"],
-  "Awi": ["Dangila", "Injibara"],
-  "East Gojjam": ["Debre Markos", "Bichena"],
-  "West Gojjam": ["Finote Selam", "Bure"],
-  "Wag Hemra": ["Sekota"],
-  "Oromia": ["Kemise", "Bati"],
-  "Central Gondar": ["Gondar", "Chilga"],
-  "Benshangul": ["Assosa", "Bambasi"]
-};
-
-const RegisterBeneficiary = () => {
+const RegisterBeneficiary = ({ selectedScope }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     surveyType: '',
-    zone: '',
-    woreda: '',
+    zone: selectedScope.zone,
+    woreda: selectedScope.woreda,
     kebele: '',
     village: '',
     latitude: '',
@@ -190,8 +176,8 @@ const RegisterBeneficiary = () => {
         phone: formData.phoneNumber || formData.representativePhone || '-',
         gender: formData.gender,
         household_size: formData.householdSize,
-        zone: formData.zone,
-        woreda: formData.woreda,
+        zone: selectedScope.zone,
+        woreda: selectedScope.woreda,
         kebele: formData.kebele,
         village: formData.village,
         survey_type: formData.surveyType,
@@ -327,27 +313,20 @@ const RegisterBeneficiary = () => {
           <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Zone *</label>{errors.zone && <span className="text-red-500 text-xs">Required</span>}</div>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            value={formData.zone}
-            onChange={(e) => { updateFormData('zone', e.target.value); updateFormData('woreda', ''); }}
+            value={selectedScope.zone}
+            disabled
           >
-            <option value="">Select...</option>
-            {Object.keys(ZONE_WOREDAS).map(zone => (
-              <option key={zone} value={zone}>{zone}</option>
-            ))}
+            <option value={selectedScope.zone}>{selectedScope.zone}</option>
           </select>
         </div>
         <div className="space-y-2">
           <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Woreda *</label>{errors.woreda && <span className="text-red-500 text-xs">Required</span>}</div>
           <select 
             className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            value={formData.woreda}
-            onChange={(e) => updateFormData('woreda', e.target.value)}
-            disabled={!formData.zone}
+            value={selectedScope.woreda}
+            disabled
           >
-            <option value="">Select Zone first</option>
-            {formData.zone && ZONE_WOREDAS[formData.zone]?.map(woreda => (
-              <option key={woreda} value={woreda}>{woreda}</option>
-            ))}
+            <option value={selectedScope.woreda}>{selectedScope.woreda}</option>
           </select>
         </div>
         <div className="space-y-2">

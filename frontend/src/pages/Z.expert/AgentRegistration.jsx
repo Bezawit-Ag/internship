@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, Info, Check, X, Shield, Plus } from 'lucide-react';
 
-const AgentRegistration = () => {
+const AgentRegistration = ({ selectedZone }) => {
   const [agents, setAgents] = useState([]);
   const [stats, setStats] = useState({ total: 0, active: 0, served: 0 });
   const [showForm, setShowForm] = useState(false);
@@ -69,7 +69,9 @@ const AgentRegistration = () => {
     const matchesSearch = a.name.toLowerCase().includes(term) || (a.phone || '').includes(term);
     const matchesZone = zoneFilter ? a.zone_id === Number(zoneFilter) : true;
     const matchesStatus = statusFilter ? a.status === statusFilter : true;
-    return matchesSearch && matchesZone && matchesStatus;
+    const zoneName = a.zone_name || `Zone ${a.zone_id}`;
+    const selectedMatch = zoneName === selectedZone;
+    return matchesSearch && matchesZone && matchesStatus && selectedMatch;
   });
 
   const getInitials = (name) => {
@@ -83,7 +85,7 @@ const AgentRegistration = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Agent Management</h2>
-          <p className="text-slate-500 mt-1">{stats.total} registered agents - zone-level field representatives</p>
+          <p className="text-slate-500 mt-1">{filteredAgents.length} registered agents in {selectedZone}</p>
         </div>
         {!showForm && (
           <button 
