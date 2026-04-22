@@ -9,6 +9,7 @@ export default function RegisterContractor({ onCancel, onSuccess }) {
     contact_phone: '',
     service_type: 'Institution'
   });
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,7 +18,26 @@ export default function RegisterContractor({ onCancel, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSuccess(formData);
+    setSaving(true);
+    fetch('http://localhost:8000/api/contractors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+    .then(res => {
+      if (res.ok) {
+        onSuccess();
+      } else {
+        alert("Failed to save contractor");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error saving contractor");
+    })
+    .finally(() => {
+      setSaving(false);
+    });
   };
 
   return (
@@ -138,9 +158,10 @@ export default function RegisterContractor({ onCancel, onSuccess }) {
           <div className="pt-6 flex items-center gap-3">
             <button 
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-8 rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
+              disabled={saving}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-8 rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50"
             >
-              Register Contractor
+              {saving ? 'Saving...' : 'Register Contractor'}
             </button>
             <button 
               type="button"

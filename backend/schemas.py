@@ -29,6 +29,23 @@ class SupplierDetailsResponse(SupplierResponse):
     coverage_zones: List[str] = []
     coverage_woredas: List[str] = []
 
+class ContractorCreate(BaseModel):
+    name: str
+    service_type: str
+    contact_person: str
+    contact_phone: str
+    address: str
+
+class ContractorResponse(BaseModel):
+    id: str
+    name: str
+    service_type: str
+    contact_person: str
+    contact_phone: str
+    address: str
+    status: str
+    registered_date: str
+
 class ZoneResponse(BaseModel):
     id: int
     name: str

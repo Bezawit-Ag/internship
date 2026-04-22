@@ -44,6 +44,7 @@ def init_db():
     c.execute("DROP TABLE IF EXISTS woredas;")
     c.execute("DROP TABLE IF EXISTS zones;")
     c.execute("DROP TABLE IF EXISTS suppliers;")
+    c.execute("DROP TABLE IF EXISTS contractors;")
     c.execute("DROP TABLE IF EXISTS agents;")
     c.execute("DROP TABLE IF EXISTS beneficiaries;")
     c.execute("DROP TABLE IF EXISTS problems;")
@@ -92,6 +93,19 @@ def init_db():
             company_type VARCHAR(100),
             score INTEGER DEFAULT 0,
             status VARCHAR(50) DEFAULT 'Active'
+        );
+    ''')
+
+    c.execute('''
+        CREATE TABLE contractors (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            service_type VARCHAR(100),
+            contact_person VARCHAR(255),
+            contact_phone VARCHAR(50),
+            address VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'Active',
+            registered_date DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     ''')
 

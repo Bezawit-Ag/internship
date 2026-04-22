@@ -12,7 +12,8 @@ export default function RegisterSupplier({ onCancel, onSuccess }) {
     service_type: 'Home Solar System'
   });
   const [saving, setSaving] = useState(false);
-
+  const [alsoContractor, setAlsoContractor] = useState(false);
+  const [contractorServiceType, setContractorServiceType] = useState('Institution');
   const serviceOptions = [
     "Home Solar System", "Solar Lantern", "Institutional Solar",
     "Off-grid Solar Grid", "Off-grid Hydro Power", "Off-grid Wind"
@@ -32,15 +33,31 @@ export default function RegisterSupplier({ onCancel, onSuccess }) {
       body: JSON.stringify(formData)
     })
     .then(res => {
-      if (res.ok) {
-        onSuccess();
-      } else {
-        alert("Failed to save supplier");
+      if (!res.ok) throw new Error("Failed to save supplier");
+      
+      if (alsoContractor) {
+        const contractorPayload = {
+          name: formData.name,
+          contact_person: formData.contact_person,
+          contact_phone: formData.contact_phone,
+          address: formData.address || 'Not Provided',
+          service_type: contractorServiceType
+        };
+        return fetch('http://localhost:8000/api/contractors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(contractorPayload)
+        }).then(cRes => {
+          if (!cRes.ok) throw new Error("Supplier saved, but failed to save contractor");
+        });
       }
+    })
+    .then(() => {
+      onSuccess();
     })
     .catch(err => {
       console.error(err);
-      alert("Error saving supplier");
+      alert(err.message || "Error saving supplier");
     })
     .finally(() => {
       setSaving(false);
@@ -49,6 +66,7 @@ export default function RegisterSupplier({ onCancel, onSuccess }) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
         <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
           <h2 className="text-xl font-bold text-slate-800">Register New Supplier</h2>
@@ -152,6 +170,53 @@ export default function RegisterSupplier({ onCancel, onSuccess }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <div className="flex items-center h-5">
+                <input 
+                  type="checkbox" 
+                  checked={alsoContractor}
+                  onChange={(e) => setAlsoContractor(e.target.checked)}
+                  className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
+                />
+              </div>
+              <div>
+                <span className="text-sm font-bold text-slate-800">Also register this entity as a Contractor</span>
+                <p className="text-xs text-slate-500 mt-1">Check this box if the supplier also provides contractor services. Details like name, contact, and address will be automatically copied to the Contractor database.</p>
+              </div>
+            </label>
+
+            {alsoContractor && (
+              <div className="mt-6 pt-6 border-t border-slate-200 animate-in fade-in slide-in-from-top-2">
+                <label className="block text-xs font-bold text-slate-700 mb-3">Contractor Service Type *</label>
+                <div className="grid grid-cols-2 gap-3 max-w-md">
+                  <button
+                    type="button"
+                    onClick={() => setContractorServiceType('Institution')}
+                    className={`py-2.5 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 border ${
+                      contractorServiceType === 'Institution' 
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20' 
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    Institution
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContractorServiceType('Off-Grid')}
+                    className={`py-2.5 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 border ${
+                      contractorServiceType === 'Off-Grid' 
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20' 
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    Off-Grid
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

@@ -25,6 +25,18 @@ def seed_data():
         INSERT INTO suppliers (name, license_number, service_type, contact_person, contact_phone, email, address, company_type, score, status) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, suppliers)
+
+    contractors = [
+        ("Amhara Installation Services PLC", "Institution", "Yohannes Tesfaye", "+251 911 100 200", "Bahir Dar, Amhara Region", "Active"),
+        ("EthioTech Energy Contractors Ltd", "Off-Grid", "Almaz Hailu", "+251 912 200 300", "Addis Ababa", "Active"),
+        ("Rural Power Installations Co.", "Off-Grid", "Dereje Mekasha", "+251 913 300 400", "Gondar, Amhara Region", "Active"),
+        ("Solar Install Amhara", "Institution", "Tigist Worku", "+251 914 400 500", "Dessie, Amhara Region", "Inactive")
+    ]
+    c.executemany("""
+        INSERT INTO contractors (name, service_type, contact_person, contact_phone, address, status)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, contractors)
+
     zones = [("North Gondar",), ("East Gojam",), ("South Wollo",), ("Awi",), ("Wag Hemra",), ("West Gojam",)]
     c.executemany("INSERT INTO zones (name) VALUES (%s)", zones)
 

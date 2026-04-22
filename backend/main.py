@@ -264,6 +264,46 @@ def create_supplier(supplier: schemas.SupplierCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# 4.6️⃣ Contractor Registration routes
+@app.get("/api/contractors", response_model=list[schemas.ContractorResponse])
+def get_contractors():
+    try:
+        conn = get_db_connection()
+        c = conn.cursor(pymysql.cursors.DictCursor)
+        c.execute("SELECT * FROM contractors ORDER BY id DESC")
+        contractors = list(c.fetchall())
+        conn.close()
+        
+        # Format the IDs to look like 'CON-001'
+        for con in contractors:
+            con['id'] = f"CON-{con['id']:03d}"
+            # Ensure registered_date is string
+            if con['registered_date']:
+                con['registered_date'] = con['registered_date'].strftime('%Y-%m-%d')
+            else:
+                import datetime
+                con['registered_date'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                
+        return contractors
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/contractors")
+def create_contractor(contractor: schemas.ContractorCreate):
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO contractors (name, service_type, contact_person, contact_phone, address, status)
+            VALUES (%s, %s, %s, %s, %s, 'Active')
+        ''', (contractor.name, contractor.service_type, contractor.contact_person, contractor.contact_phone, contractor.address))
+        conn.commit()
+        last_id = c.lastrowid
+        conn.close()
+        return {"message": "Contractor registered successfully", "id": f"CON-{last_id:03d}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # 5️⃣ Area Assignment routes
 @app.get("/api/area-options", response_model=schemas.AreaOptionsResponse)
