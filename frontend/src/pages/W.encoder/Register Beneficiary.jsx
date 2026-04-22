@@ -113,17 +113,12 @@ const RegisterBeneficiary = ({ selectedScope }) => {
         if (formData.devices.length === 0) newErrors.devices = "Required";
       }
     } else if (currentStep === 4) {
-      if (!formData.equipmentType) newErrors.equipmentType = "Required";
-      if (!formData.serialNumber) newErrors.serialNumber = "Required";
-      if (!formData.assignedSupplier) newErrors.assignedSupplier = "Required";
-      if (!formData.unitPrice) newErrors.unitPrice = "Required";
-      if (!formData.guarantee) newErrors.guarantee = "Required";
-      if (formData.guarantee === 'Guarantee' && !formData.guaranteePeriod) newErrors.guaranteePeriod = "Required";
+      if (formData.surveyType === 'Home/Lantern') {
+        if (!formData.equipmentType) newErrors.equipmentType = "Required";
+      }
     } else if (currentStep === 5) {
       if (formData.surveyType === 'Off-Grid') {
         if (!formData.projectCapacity) newErrors.projectCapacity = "Required";
-        if (!formData.projectCost) newErrors.projectCost = "Required";
-        if (!formData.installationDate) newErrors.installationDate = "Required";
         
         if (formData.offGridType === 'Hydro Power') {
           if (!formData.hydroPowerType) newErrors.hydroPowerType = "Required";
@@ -151,9 +146,6 @@ const RegisterBeneficiary = ({ selectedScope }) => {
           if (!formData.breakerBoard) newErrors.breakerBoard = "Required";
         }
       } else {
-         if (!formData.installationDate) newErrors.installationDate = "Required";
-         if (!formData.installerName) newErrors.installerName = "Required";
-         if (!formData.salePrice) newErrors.salePrice = "Required";
          if (!formData.batteryCapacity) newErrors.batteryCapacity = "Required";
          if (!formData.comments) newErrors.comments = "Required";
       }
@@ -616,10 +608,11 @@ const RegisterBeneficiary = ({ selectedScope }) => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
        <div className="flex items-center gap-2 text-purple-600 font-bold mb-4">
         <Package className="w-5 h-5" />
-        <h4 className="text-lg text-slate-800">Equipment & Supplier Details</h4>
+        <h4 className="text-lg text-slate-800">Equipment Details</h4>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+         {formData.surveyType === 'Home/Lantern' && (
          <div className="col-span-2 space-y-2">
           <label className="text-sm font-semibold text-slate-700">Equipment Type *</label>
           <div className="flex gap-2">
@@ -644,83 +637,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
             </button>
           </div>
         </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Equipment Serial Number *</label>{errors.serialNumber && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="text" 
-            placeholder="e.g. 997890"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.serialNumber}
-            onChange={(e) => updateFormData('serialNumber', e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">
-            {formData.surveyType === 'Institution' || formData.surveyType === 'Off-Grid' ? 'Contractor' : 'Assigned Supplier'} *
-          </label>{errors.assignedSupplier && <span className="text-red-500 text-xs">Required</span>}</div>
-          <select 
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            value={formData.assignedSupplier}
-            onChange={(e) => updateFormData('assignedSupplier', e.target.value)}
-          >
-            <option value="">Select...</option>
-            {formData.surveyType === 'Institution' || formData.surveyType === 'Off-Grid' ? (
-              <>
-                <option value="Sunrise Contractors">Sunrise Contractors</option>
-                <option value="GreenGrid Builders">GreenGrid Builders</option>
-              </>
-            ) : (
-              <>
-                <option value="Solar Solutions Ethiopia PLC">Solar Solutions Ethiopia PLC</option>
-                <option value="EthioSun Light">EthioSun Light</option>
-              </>
-            )}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Unit Price (ETB) *</label>{errors.unitPrice && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="number" 
-            placeholder="e.g. 2345"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.unitPrice}
-            onChange={(e) => updateFormData('unitPrice', e.target.value)}
-          />
-        </div>
-         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Guarantee *</label>
-          <div className="flex gap-2">
-            {errors.guarantee && <p className="text-red-500 text-xs mb-2 flex items-center gap-1 w-full"><AlertTriangle className="w-3 h-3"/> {errors.guarantee}</p>}
-            <button 
-              onClick={() => updateFormData('guarantee', 'Guarantee')}
-              className={`flex-1 py-3 font-semibold rounded-xl border ${formData.guarantee === 'Guarantee' ? 'border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-            >Guarantee</button>
-             <button 
-              onClick={() => updateFormData('guarantee', 'No Guarantee')}
-               className={`flex-1 py-3 font-semibold rounded-xl border ${formData.guarantee === 'No Guarantee' ? 'border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-            >No Guarantee</button>
-          </div>
-        </div>
-
-        {formData.guarantee === 'Guarantee' && (
-          <div className="space-y-2">
-            <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Guarantee Period (Years) *</label>{errors.guaranteePeriod && <span className="text-red-500 text-xs">Required</span>}</div>
-            <select 
-              className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              value={formData.guaranteePeriod}
-              onChange={(e) => updateFormData('guaranteePeriod', e.target.value)}
-            >
-              <option value="">Select...</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="5">5</option>
-            </select>
-          </div>
         )}
-      </div>
 
        <div className="col-span-2 space-y-2 mt-4">
            <label className="text-sm font-semibold text-slate-700">Upload Documents</label>
@@ -739,6 +656,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
              </label>
           </div>
         </div>
+      </div>
     </div>
   );
 
@@ -748,22 +666,13 @@ const RegisterBeneficiary = ({ selectedScope }) => {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
            <div className="flex items-center gap-2 text-emerald-500 font-bold mb-6 border-b pb-4">
             <Zap className="w-6 h-6" />
-            <h4 className="text-xl text-slate-800">Project Installation Information</h4>
+            <h4 className="text-xl text-slate-800">Project Technical Details</h4>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Project Capacity (KW)</label>{errors.projectCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
               <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCapacity} onChange={(e) => updateFormData('projectCapacity', e.target.value)} />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Project Cost</label>{errors.projectCost && <span className="text-red-500 text-xs">Required</span>}</div>
-              <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCost} onChange={(e) => updateFormData('projectCost', e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Date of Installation / Construction Year</label>{errors.installationDate && <span className="text-red-500 text-xs">Required</span>}</div>
-              <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.installationDate} onChange={(e) => updateFormData('installationDate', e.target.value)} />
             </div>
 
             {formData.offGridType === 'Hydro Power' && (
@@ -913,37 +822,10 @@ const RegisterBeneficiary = ({ selectedScope }) => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
        <div className="flex items-center gap-2 text-blue-400 font-bold mb-4">
         <Zap className="w-5 h-5" />
-        <h4 className="text-lg text-slate-800">Installation & Technical Details</h4>
+        <h4 className="text-lg text-slate-800">Technical Details</h4>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Installation Date *</label>{errors.installationDate && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="date"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-600"
-            value={formData.installationDate}
-            onChange={(e) => updateFormData('installationDate', e.target.value)}
-          />
-        </div>
-         <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Installer / Agent Name *</label>{errors.installerName && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="text"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.installerName}
-            onChange={(e) => updateFormData('installerName', e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Sale Price (ETB) *</label>{errors.salePrice && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="number"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.salePrice}
-            onChange={(e) => updateFormData('salePrice', e.target.value)}
-          />
-        </div>
          <div className="space-y-2">
           <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah) *</label>{errors.batteryCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
           <input 
@@ -995,23 +877,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
           </div>
            <div>
             <span className="text-xs text-blue-500 block mb-1">Equipment Type</span>
-            <span className="font-bold text-blue-900">{formData.surveyType === 'Off-Grid' ? formData.offGridType : formData.equipmentType || '-'}</span>
-          </div>
-           <div>
-            <span className="text-xs text-blue-500 block mb-1">Serial Number</span>
-            <span className="font-bold text-blue-900">{formData.serialNumber || '-'}</span>
-          </div>
-           <div>
-            <span className="text-xs text-blue-500 block mb-1">Supplier</span>
-            <span className="font-bold text-blue-900">{formData.assignedSupplier || '-'}</span>
-          </div>
-           <div>
-            <span className="text-xs text-blue-500 block mb-1">Guarantee</span>
-            <span className="font-bold text-blue-900">{formData.guarantee || '-'}</span>
-          </div>
-           <div>
-            <span className="text-xs text-blue-500 block mb-1">Unit Price</span>
-            <span className="font-bold text-blue-900">{formData.unitPrice ? `ETB ${formData.unitPrice}` : '-'}</span>
+            <span className="font-bold text-blue-900">{formData.surveyType === 'Off-Grid' ? formData.offGridType : formData.surveyType === 'Home/Lantern' ? formData.equipmentType : '-'}</span>
           </div>
         </div>
       </div>
