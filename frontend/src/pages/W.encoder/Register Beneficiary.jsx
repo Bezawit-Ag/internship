@@ -11,13 +11,16 @@ const STEPS = [
   { id: 2, label: 'Location', icon: MapPin },
   { id: 3, label: 'Beneficiary Info', icon: User },
   { id: 4, label: 'Equipment Details', icon: Package },
-  { id: 5, label: 'Technical Info', icon: Settings },
-  { id: 6, label: 'Review', icon: CheckCircle2 }
+  { id: 5, label: 'Review', icon: CheckCircle2 }
 ];
 
 const RegisterBeneficiary = ({ selectedScope }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [isGroupRegistration, setIsGroupRegistration] = useState(false);
+  const [groupSize, setGroupSize] = useState(1);
+  const [savedForms, setSavedForms] = useState([]);
+  const [currentFormIndex, setCurrentFormIndex] = useState(0);
   const [formData, setFormData] = useState({
     surveyType: '',
     zone: selectedScope.zone,
@@ -116,39 +119,6 @@ const RegisterBeneficiary = ({ selectedScope }) => {
       if (formData.surveyType === 'Home/Lantern') {
         if (!formData.equipmentType) newErrors.equipmentType = "Required";
       }
-    } else if (currentStep === 5) {
-      if (formData.surveyType === 'Off-Grid') {
-        if (!formData.projectCapacity) newErrors.projectCapacity = "Required";
-        
-        if (formData.offGridType === 'Hydro Power') {
-          if (!formData.hydroPowerType) newErrors.hydroPowerType = "Required";
-          if (!formData.minimumFlow) newErrors.minimumFlow = "Required";
-          if (!formData.hydroHead) newErrors.hydroHead = "Required";
-          if (!formData.estimatedPowerOutput) newErrors.estimatedPowerOutput = "Required";
-        }
-        if (formData.offGridType === 'Solar Grid') {
-          if (!formData.solarPanelType) newErrors.solarPanelType = "Required";
-          if (!formData.noOfSolarPanel) newErrors.noOfSolarPanel = "Required";
-          if (!formData.solarPanelManufacture) newErrors.solarPanelManufacture = "Required";
-          if (!formData.solarPanelModel) newErrors.solarPanelModel = "Required";
-          if (!formData.batteryType) newErrors.batteryType = "Required";
-          if (!formData.noOfBattery) newErrors.noOfBattery = "Required";
-          if (!formData.batteryManufacture) newErrors.batteryManufacture = "Required";
-          if (!formData.batteryModel) newErrors.batteryModel = "Required";
-          if (!formData.batteryCapacity) newErrors.batteryCapacity = "Required";
-          if (!formData.totalEnergyOfBattery) newErrors.totalEnergyOfBattery = "Required";
-          if (!formData.systemVoltage) newErrors.systemVoltage = "Required";
-          if (!formData.inverterType) newErrors.inverterType = "Required";
-          if (!formData.inverterManufacture) newErrors.inverterManufacture = "Required";
-          if (!formData.inverterMode) newErrors.inverterMode = "Required";
-          if (!formData.noOfInverter) newErrors.noOfInverter = "Required";
-          if (!formData.inverterCapacity) newErrors.inverterCapacity = "Required";
-          if (!formData.breakerBoard) newErrors.breakerBoard = "Required";
-        }
-      } else {
-         if (!formData.batteryCapacity) newErrors.batteryCapacity = "Required";
-         if (!formData.comments) newErrors.comments = "Required";
-      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -156,12 +126,85 @@ const RegisterBeneficiary = ({ selectedScope }) => {
       return;
     }
 
-    setCurrentStep(prev => Math.min(prev + 1, 6));
+    setCurrentStep(prev => Math.min(prev + 1, 5));
   };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const submitForm = async () => {
     try {
+      // Handle group registration logic for Home/Lantern
+      if (formData.surveyType === 'Home/Lantern' && isGroupRegistration) {
+        // Save current form to savedForms array
+        const newForm = { ...formData };
+        setSavedForms(prev => [...prev, newForm]);
+        
+        // Check if we need to continue with more forms
+        if (currentFormIndex + 1 < groupSize) {
+          // Move to next form
+          setCurrentFormIndex(prev => prev + 1);
+          // Reset form data but keep survey type and location
+          const resetData = {
+            ...formData,
+            fullName: '',
+            nationalId: '',
+            phoneNumber: '',
+            gender: '',
+            householdSize: '',
+            monthlyIncome: '',
+            lightingSource: '',
+            energyNeeds: '',
+            electricityAccess: 'Yes',
+            devices: [],
+            equipmentType: 'Home Solar System',
+            comments: '',
+            idPhoto: null,
+            proofPhoto: null
+          };
+          setFormData(resetData);
+          // Go back to step 1
+          setCurrentStep(1);
+          alert(`Form ${currentFormIndex + 1} saved! Now filling form ${currentFormIndex + 2} of ${groupSize}.`);
+          return;
+        } else {
+          // All forms are completed, submit all saved forms
+          const allForms = [...savedForms, formData];
+          
+          for (const form of allForms) {
+            const payload = {
+              full_name: form.fullName,
+              national_id: form.nationalId || '-',
+              phone: form.phoneNumber || '-',
+              gender: form.gender,
+              household_size: form.householdSize,
+              zone: selectedScope.zone,
+              woreda: selectedScope.woreda,
+              kebele: form.kebele,
+              village: form.village,
+              survey_type: form.surveyType,
+              equipment_type: form.equipmentType,
+              supplier: form.assignedSupplier,
+              status: 'Pending Woreda',
+              details_json: JSON.stringify(form)
+            };
+
+            const res = await fetch('http://localhost:8000/api/beneficiaries', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            
+            if (!res.ok) {
+              throw new Error(`Failed to submit form for ${form.fullName}`);
+            }
+          }
+          
+          alert(`Successfully registered ${groupSize} beneficiaries!`);
+          window.location.reload();
+          return;
+        }
+      }
+
+      // Normal single form submission
       const payload = {
         full_name: formData.fullName || formData.institutionName || formData.representativeName,
         national_id: formData.nationalId || '-',
@@ -660,195 +703,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
     </div>
   );
 
-  const Step5 = () => {
-    if (formData.surveyType === 'Off-Grid') {
-      return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-           <div className="flex items-center gap-2 text-emerald-500 font-bold mb-6 border-b pb-4">
-            <Zap className="w-6 h-6" />
-            <h4 className="text-xl text-slate-800">Project Technical Details</h4>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Project Capacity (KW)</label>{errors.projectCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
-              <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.projectCapacity} onChange={(e) => updateFormData('projectCapacity', e.target.value)} />
-            </div>
-
-            {formData.offGridType === 'Hydro Power' && (
-              <>
-                <div className="col-span-2 mt-4 pt-4 border-t">
-                   <h5 className="font-bold text-slate-700 mb-4">Hydro Power Details</h5>
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Hydro Power Type</label>{errors.hydroPowerType && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.hydroPowerType} onChange={(e) => updateFormData('hydroPowerType', e.target.value)}>
-                    <option value="">Select...</option>
-                    <option value="Pico Hydro Power <=5KW">Pico Hydro Power {"<="}5KW</option>
-                    <option value="Micro Hydro Power 5-100KW">Micro Hydro Power 5-100KW</option>
-                    <option value="Mini Hydro Power 100-1000KW">Mini Hydro Power 100-1000KW</option>
-                    <option value="Small Hydro Power 1000-10000KW">Small Hydro Power 1000-10000KW</option>
-                    <option value="Medium Hydro Power 10-100MW">Medium Hydro Power 10-100MW</option>
-                    <option value="Large /Mega Hydro Power 100MW and above">Large /Mega Hydro Power 100MW and above</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Minimum Flow (M3/sec)</label>{errors.minimumFlow && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.minimumFlow} onChange={(e) => updateFormData('minimumFlow', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Head (m)</label>{errors.hydroHead && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.hydroHead} onChange={(e) => updateFormData('hydroHead', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Estimated Power output (KW)</label>{errors.estimatedPowerOutput && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.estimatedPowerOutput} onChange={(e) => updateFormData('estimatedPowerOutput', e.target.value)} />
-                </div>
-              </>
-            )}
-
-            {formData.offGridType === 'Solar Grid' && (
-              <>
-                <div className="col-span-2 mt-4 pt-4 border-t">
-                   <h5 className="font-bold text-slate-700 mb-4">Solar Panel Information</h5>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Type</label>{errors.solarPanelType && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.solarPanelType} onChange={(e) => updateFormData('solarPanelType', e.target.value)}>
-                     <option value="">Select...</option>
-                     <option value="Mon Crystal">Mon Crystal</option>
-                     <option value="Poly Crystal">Poly Crystal</option>
-                     <option value="Amorphas">Amorphas</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Solar Panel</label>{errors.noOfSolarPanel && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfSolarPanel} onChange={(e) => updateFormData('noOfSolarPanel', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Manufacture</label>{errors.solarPanelManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelManufacture} onChange={(e) => updateFormData('solarPanelManufacture', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Solar Panel Model</label>{errors.solarPanelModel && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.solarPanelModel} onChange={(e) => updateFormData('solarPanelModel', e.target.value)} />
-                </div>
-
-                <div className="col-span-2 mt-4 pt-4 border-t">
-                   <h5 className="font-bold text-slate-700 mb-4">Battery Information</h5>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Type</label>{errors.batteryType && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.batteryType} onChange={(e) => updateFormData('batteryType', e.target.value)}>
-                     <option value="">Select...</option>
-                     <option value="Lead Acid">Lead Acid</option>
-                     <option value="Lithium Ion">Lithium Ion</option>
-                     <option value="Jel Type">Jel Type</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Battery</label>{errors.noOfBattery && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfBattery} onChange={(e) => updateFormData('noOfBattery', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Manufacture</label>{errors.batteryManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryManufacture} onChange={(e) => updateFormData('batteryManufacture', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Model</label>{errors.batteryModel && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryModel} onChange={(e) => updateFormData('batteryModel', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Capacity (Ahr)</label>{errors.batteryCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.batteryCapacity} onChange={(e) => updateFormData('batteryCapacity', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Total Energy of Batter (KWhr)</label>{errors.totalEnergyOfBattery && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.totalEnergyOfBattery} onChange={(e) => updateFormData('totalEnergyOfBattery', e.target.value)} />
-                </div>
-
-                <div className="col-span-2 mt-4 pt-4 border-t">
-                   <h5 className="font-bold text-slate-700 mb-4">Inverter & System Information</h5>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">System Voltage (V)</label>{errors.systemVoltage && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.systemVoltage} onChange={(e) => updateFormData('systemVoltage', e.target.value)}>
-                     <option value="">Select...</option>
-                     <option value="12V">12V</option>
-                     <option value="24V">24V</option>
-                     <option value="48V">48V</option>
-                     <option value="96V">96V</option>
-                     <option value="112V">112V</option>
-                     <option value="120V">120V</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Type</label>{errors.inverterType && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <select className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" value={formData.inverterType} onChange={(e) => updateFormData('inverterType', e.target.value)}>
-                     <option value="">Select...</option>
-                     <option value="Off Gride">Off Gride</option>
-                     <option value="On Gride">On Gride</option>
-                     <option value="High Bride">High Bride</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Invertor Manufacture</label>{errors.inverterManufacture && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterManufacture} onChange={(e) => updateFormData('inverterManufacture', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Mode</label>{errors.inverterMode && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterMode} onChange={(e) => updateFormData('inverterMode', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">No of Inverter/Charge Controller</label>{errors.noOfInverter && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.noOfInverter} onChange={(e) => updateFormData('noOfInverter', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Inverter Capacity (KW)</label>{errors.inverterCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="number" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.inverterCapacity} onChange={(e) => updateFormData('inverterCapacity', e.target.value)} />
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Breaker Board (SDB)</label>{errors.breakerBoard && <span className="text-red-500 text-xs">Required</span>}</div>
-                  <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" value={formData.breakerBoard} onChange={(e) => updateFormData('breakerBoard', e.target.value)} />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-       <div className="flex items-center gap-2 text-blue-400 font-bold mb-4">
-        <Zap className="w-5 h-5" />
-        <h4 className="text-lg text-slate-800">Technical Details</h4>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-         <div className="space-y-2">
-          <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Battery Capacity (Ah) *</label>{errors.batteryCapacity && <span className="text-red-500 text-xs">Required</span>}</div>
-          <input 
-            type="number"
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.batteryCapacity}
-            onChange={(e) => updateFormData('batteryCapacity', e.target.value)}
-          />
-        </div>
-        <div className="col-span-2 space-y-2">
-           <div className="flex justify-between"><label className="text-sm font-semibold text-slate-700">Additional Comments *</label>{errors.comments && <span className="text-red-500 text-xs">Required</span>}</div>
-           <textarea 
-            placeholder="Any additional notes or observations..."
-            className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-y"
-            value={formData.comments}
-            onChange={(e) => updateFormData('comments', e.target.value)}
-           ></textarea>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+  
   const Step6 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center gap-2 text-emerald-500 font-bold mb-4">
@@ -882,6 +737,55 @@ const RegisterBeneficiary = ({ selectedScope }) => {
         </div>
       </div>
 
+      {/* Group Registration Section - Only for Home/Lantern */}
+      {formData.surveyType === 'Home/Lantern' && (
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="w-5 h-5 text-purple-600" />
+            <h5 className="font-bold text-purple-900">Group Registration (Optional)</h5>
+          </div>
+          <p className="text-sm text-purple-700 mb-4">
+            Register multiple beneficiaries from the same neighborhood or group. 
+            The form will be saved and you can fill it out for each person.
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-semibold text-purple-700 block mb-2">
+                Number of People in Group
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={groupSize}
+                onChange={(e) => setGroupSize(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full p-3 rounded-xl border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                placeholder="Enter number of people"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="groupRegistration"
+                checked={isGroupRegistration}
+                onChange={(e) => setIsGroupRegistration(e.target.checked)}
+                className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
+              />
+              <label htmlFor="groupRegistration" className="text-sm font-medium text-purple-700">
+                Enable group registration
+              </label>
+            </div>
+          </div>
+          {isGroupRegistration && (
+            <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+              <p className="text-sm text-purple-800">
+                <strong>Progress:</strong> {currentFormIndex + 1} of {groupSize} forms completed
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex gap-3 text-yellow-800 text-sm">
         <AlertTriangle className="w-5 h-5 shrink-0 text-yellow-600" />
         <p>By submitting, you confirm that all entered data is accurate. The record will go to the Woreda Approver for review.</p>
@@ -912,8 +816,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
               {currentStep === 2 && Step2()}
               {currentStep === 3 && Step3()}
               {currentStep === 4 && Step4()}
-              {currentStep === 5 && Step5()}
-              {currentStep === 6 && Step6()}
+              {currentStep === 5 && Step6()}
             </>
           )}
         </div>
@@ -932,7 +835,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
           </button>
 
           <div className="flex gap-2">
-            {[1, 2, 3, 4, 5, 6].map(step => (
+            {[1, 2, 3, 4, 5].map(step => (
               <div 
                 key={step} 
                 className={`h-2 rounded-full transition-all duration-300 ${
@@ -945,7 +848,7 @@ const RegisterBeneficiary = ({ selectedScope }) => {
 
           {(currentStep > 1 && !['Home/Lantern', 'Institution', 'Off-Grid'].includes(formData.surveyType)) ? (
             <div className="px-6 py-3 opacity-0 pointer-events-none">Placeholder</div>
-          ) : currentStep < 6 ? (
+          ) : currentStep < 5 ? (
             <button 
               onClick={nextStep}
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all"
