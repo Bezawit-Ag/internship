@@ -39,29 +39,87 @@ def test():
 
 # 4️⃣ Dashboard data route
 @app.get("/api/dashboard", response_model=schemas.DashboardDataResponse)
-def get_dashboard_data():
+def get_dashboard_data(zone: str = None, woreda: str = None, gender: str = None):
     try:
         conn = get_db_connection()
         c = conn.cursor(pymysql.cursors.DictCursor)  # ✅ DictCursor returns dicts
         
-        # Override dashboard stats to match the mockup exactly
-        stats = {
-            "total_suppliers": 124,
-            "suppliers_trend": 12.0,
-            "registered_contractors": 18,
-            "contractors_trend": 8.0,
-            "total_beneficiaries": 45280,
-            "beneficiaries_trend": 15.0,
-            "units_distributed": 41289,
-            "units_trend": 11.0,
-            "active_zones": 11,
-            "pending_approvals": 342,
-            "pending_trend": -4.0,
-            "functional_systems": 38200,
-            "functional_trend": 3.0,
-            "non_functional_systems": 2100,
-            "non_functional_trend": -6.0
-        }
+        beneficiary_where = []
+        beneficiary_params = []
+        problem_where = []
+        problem_params = []
+        
+        if zone:
+            beneficiary_where.append("zone = %s")
+            beneficiary_params.append(zone)
+            problem_where.append("zone = %s")
+            problem_params.append(zone)
+        if woreda:
+            beneficiary_where.append("woreda = %s")
+            beneficiary_params.append(woreda)
+            problem_where.append("woreda = %s")
+            problem_params.append(woreda)
+        if gender:
+            beneficiary_where.append("gender = %s")
+            beneficiary_params.append(gender)
+            
+        b_where_clause = "WHERE " + " AND ".join(beneficiary_where) if beneficiary_where else ""
+        p_where_clause = "WHERE " + " AND ".join(problem_where) if problem_where else ""
+
+        c.execute(f"SELECT COUNT(*) as count FROM beneficiaries {b_where_clause}", tuple(beneficiary_params))
+        total_beneficiaries = c.fetchone()['count'] or 0
+        
+        # Pending approvals (beneficiaries pending)
+        b_pending_clause = b_where_clause + (" AND " if beneficiary_where else "WHERE ") + "status LIKE %s"
+        c.execute(f"SELECT COUNT(*) as count FROM beneficiaries {b_pending_clause}", tuple(beneficiary_params) + ("Pending%",))
+        pending_approvals = c.fetchone()['count'] or 0
+
+        # Non-functional systems = problems not resolved
+        p_unresolved_clause = p_where_clause + (" AND " if problem_where else "WHERE ") + "status NOT IN ('Resolved')"
+        c.execute(f"SELECT COUNT(*) as count FROM problems {p_unresolved_clause}", tuple(problem_params))
+        non_functional_systems = c.fetchone()['count'] or 0
+        
+        functional_systems = total_beneficiaries - non_functional_systems if total_beneficiaries > non_functional_systems else 0
+        units_distributed = total_beneficiaries
+
+        if not zone and not woreda and not gender:
+            # Override dashboard stats to match the mockup exactly for super admin when no filters apply
+            stats = {
+                "total_suppliers": 124,
+                "suppliers_trend": 12.0,
+                "registered_contractors": 18,
+                "contractors_trend": 8.0,
+                "total_beneficiaries": 45280,
+                "beneficiaries_trend": 15.0,
+                "units_distributed": 41289,
+                "units_trend": 11.0,
+                "active_zones": 11,
+                "pending_approvals": 342,
+                "pending_trend": -4.0,
+                "functional_systems": 38200,
+                "functional_trend": 3.0,
+                "non_functional_systems": 2100,
+                "non_functional_trend": -6.0
+            }
+        else:
+            # Use dynamic counts for filtered dashboards
+            stats = {
+                "total_suppliers": 124, # using mockup count for suppliers since they are global
+                "suppliers_trend": 12.0,
+                "registered_contractors": 18,
+                "contractors_trend": 8.0,
+                "total_beneficiaries": total_beneficiaries,
+                "beneficiaries_trend": 0.0,
+                "units_distributed": units_distributed,
+                "units_trend": 0.0,
+                "active_zones": 1,
+                "pending_approvals": pending_approvals,
+                "pending_trend": 0.0,
+                "functional_systems": functional_systems,
+                "functional_trend": 0.0,
+                "non_functional_systems": non_functional_systems,
+                "non_functional_trend": 0.0
+            }
         
         # Fetch last 5 activity logs
         c.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 5")
@@ -106,12 +164,18 @@ def get_dashboard_data():
             {"supplier": "EthioSun", "score": 75},
         ]
         
-        functional_status = [
-            {"name": "Functional", "value": 38200},
-            {"name": "Partially Functional", "value": 4100},
-            {"name": "Not Functional", "value": 2100},
-            {"name": "Abandoned", "value": 880},
-        ]
+        if zone or woreda or gender:
+            functional_status = [
+                {"name": "Functional", "value": functional_systems},
+                {"name": "Not Functional", "value": non_functional_systems},
+            ]
+        else:
+            functional_status = [
+                {"name": "Functional", "value": 38200},
+                {"name": "Partially Functional", "value": 4100},
+                {"name": "Not Functional", "value": 2100},
+                {"name": "Abandoned", "value": 880},
+            ]
         
         return schemas.DashboardDataResponse(
             stats=stats,

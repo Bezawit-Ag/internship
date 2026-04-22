@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import ApprovalQueue from './ApprovalQueue';
 import ProblemApproval from './ProblemApproval';
+import Overview from './Overview';
 import ScopeSelector from '../../components/ScopeSelector';
 import { useState } from 'react';
 
@@ -27,9 +28,10 @@ const ZoneApproverDashboard = () => {
         <Header selectedZone={selectedZone} />
         <main className="flex-1 p-8 overflow-y-auto w-full">
           <Routes>
+            <Route path="overview" element={<Overview selectedZone={selectedZone} />} />
             <Route path="queue" element={<ApprovalQueue selectedZone={selectedZone} />} />
             <Route path="problems" element={<ProblemApproval selectedZone={selectedZone} />} />
-            <Route path="/" element={<Navigate to="queue" replace />} />
+            <Route path="/" element={<Navigate to="overview" replace />} />
           </Routes>
         </main>
       </div>

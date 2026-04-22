@@ -29,7 +29,7 @@ const Sidebar = ({ selectedZone }) => {
 
       <div className="flex-1 overflow-y-auto">
         <nav className="px-4 space-y-1">
-          <NavLink to="/zoneA" end className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-left ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent'}`}>
+          <NavLink to="/zoneA/overview" className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-left ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent'}`}>
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </NavLink>
         </nav>
