@@ -82,44 +82,35 @@ def get_dashboard_data(zone: str = None, woreda: str = None, gender: str = None)
         functional_systems = total_beneficiaries - non_functional_systems if total_beneficiaries > non_functional_systems else 0
         units_distributed = total_beneficiaries
 
-        if not zone and not woreda and not gender:
-            # Override dashboard stats to match the mockup exactly for super admin when no filters apply
-            stats = {
-                "total_suppliers": 124,
-                "suppliers_trend": 12.0,
-                "registered_contractors": 18,
-                "contractors_trend": 8.0,
-                "total_beneficiaries": 45280,
-                "beneficiaries_trend": 15.0,
-                "units_distributed": 41289,
-                "units_trend": 11.0,
-                "active_zones": 11,
-                "pending_approvals": 342,
-                "pending_trend": -4.0,
-                "functional_systems": 38200,
-                "functional_trend": 3.0,
-                "non_functional_systems": 2100,
-                "non_functional_trend": -6.0
-            }
-        else:
-            # Use dynamic counts for filtered dashboards
-            stats = {
-                "total_suppliers": 124, # using mockup count for suppliers since they are global
-                "suppliers_trend": 12.0,
-                "registered_contractors": 18,
-                "contractors_trend": 8.0,
-                "total_beneficiaries": total_beneficiaries,
-                "beneficiaries_trend": 0.0,
-                "units_distributed": units_distributed,
-                "units_trend": 0.0,
-                "active_zones": 1,
-                "pending_approvals": pending_approvals,
-                "pending_trend": 0.0,
-                "functional_systems": functional_systems,
-                "functional_trend": 0.0,
-                "non_functional_systems": non_functional_systems,
-                "non_functional_trend": 0.0
-            }
+        # Fetch actual counts for global metrics
+        c.execute("SELECT COUNT(*) as count FROM suppliers")
+        total_suppliers = c.fetchone()['count'] or 0
+        
+        c.execute("SELECT COUNT(*) as count FROM contractors")
+        registered_contractors = c.fetchone()['count'] or 0
+        
+        # Count active zones (can be based on zones table or area_assignments)
+        c.execute("SELECT COUNT(*) as count FROM zones")
+        active_zones = c.fetchone()['count'] or 0
+
+        # Use dynamic counts for the dashboard cards
+        stats = {
+            "total_suppliers": total_suppliers,
+            "suppliers_trend": 0.0,
+            "registered_contractors": registered_contractors,
+            "contractors_trend": 0.0,
+            "total_beneficiaries": total_beneficiaries,
+            "beneficiaries_trend": 0.0,
+            "units_distributed": units_distributed,
+            "units_trend": 0.0,
+            "active_zones": active_zones,
+            "pending_approvals": pending_approvals,
+            "pending_trend": 0.0,
+            "functional_systems": functional_systems,
+            "functional_trend": 0.0,
+            "non_functional_systems": non_functional_systems,
+            "non_functional_trend": 0.0
+        }
         
         # Fetch last 5 activity logs
         c.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 5")
